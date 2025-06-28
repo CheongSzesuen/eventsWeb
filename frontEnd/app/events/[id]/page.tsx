@@ -1,19 +1,30 @@
 import { fetchEvents } from '@/lib/api';
 import { notFound } from 'next/navigation';
 
-interface Event {
-  id: string
-  question: string
-  choices: Record<string, string>
-  results: Record<string, any>
-  contributors?: string[]
+interface ChoiceResult {
+  text: string;
+  prob?: number;
+  end_game?: boolean;
 }
 
-export default async function EventDetailPage({
-  params
-}: {
-  params: { id: string }
-}) {
+interface Event {
+  id: string;
+  question: string;
+  choices: Record<string, string>;
+  results: Record<string, string | ChoiceResult[]>;
+  end_game_choices?: string[];
+  achievements?: Record<string, string>;
+  contributors?: string[];
+  category?: string;
+}
+
+interface PageProps {
+  params: {
+    id: string;
+  };
+}
+
+export default async function EventDetailPage({ params }: PageProps) {
   let data;
   try {
     data = await fetchEvents();
@@ -29,9 +40,9 @@ export default async function EventDetailPage({
   const allEvents = [
     ...Object.values(data.events).flat(),
     ...data.random_events
-  ];
+  ] as Event[];
   
-  const event = allEvents.find((e: Event) => e.id === params.id);
+  const event = allEvents.find(e => e.id === params.id);
 
   if (!event) return notFound();
 
@@ -53,7 +64,7 @@ export default async function EventDetailPage({
                 <div className="mt-2 ml-4">
                   {Array.isArray(event.results[key]) ? (
                     <ul className="space-y-2">
-                      {(event.results[key] as any[]).map((result, i) => (
+                      {(event.results[key] as ChoiceResult[]).map((result, i) => (
                         <li 
                           key={i} 
                           className={`p-3 rounded ${
