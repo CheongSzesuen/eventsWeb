@@ -18,7 +18,7 @@ interface Event {
   category?: string;
 }
 
-// 不再自定义 PageProps
+// 直接写参数类型
 const EventDetailPage = async ({ params }: { params: { id: string } }) => {
   let data;
   try {
