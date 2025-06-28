@@ -24,7 +24,7 @@ interface PageProps {
   };
 }
 
-export default async function EventDetailPage({ params }: PageProps) {
+const EventDetailPage = async ({ params }: PageProps) => {
   let data;
   try {
     data = await fetchEvents();
@@ -112,3 +112,5 @@ export default async function EventDetailPage({ params }: PageProps) {
     </div>
   );
 }
+
+export default EventDetailPage;
