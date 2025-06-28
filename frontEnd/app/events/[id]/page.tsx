@@ -1,17 +1,37 @@
 import { fetchEvents } from '@/lib/api';
 import { notFound } from 'next/navigation';
 
+interface Event {
+  id: string
+  question: string
+  choices: Record<string, string>
+  results: Record<string, any>
+  contributors?: string[]
+}
+
 export default async function EventDetailPage({
   params
 }: {
   params: { id: string }
 }) {
-  const data = await fetchEvents();
+  let data;
+  try {
+    data = await fetchEvents();
+  } catch (error) {
+    console.error('Failed to fetch events:', error);
+    return notFound();
+  }
+
+  if (!data || !data.events || !data.random_events) {
+    return notFound();
+  }
+
   const allEvents = [
     ...Object.values(data.events).flat(),
     ...data.random_events
   ];
-  const event = allEvents.find(e => e.id === params.id);
+  
+  const event = allEvents.find((e: Event) => e.id === params.id);
 
   if (!event) return notFound();
 
