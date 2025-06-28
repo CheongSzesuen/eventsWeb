@@ -18,13 +18,8 @@ interface Event {
   category?: string;
 }
 
-interface PageProps {
-  params: {
-    id: string;
-  };
-}
-
-const EventDetailPage = async ({ params }: PageProps) => {
+// 不再自定义 PageProps
+const EventDetailPage = async ({ params }: { params: { id: string } }) => {
   let data;
   try {
     data = await fetchEvents();
