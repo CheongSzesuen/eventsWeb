@@ -11,11 +11,8 @@ const SCHOOL_NAMES: Record<string, string> = {
   'group_3': '汗忠市龙港高级中学'
 };
 
-export default async function GroupEventsPage({
-  params
-}: {
-  params: { groupName: string }
-}) {
+export default async function GroupEventsPage(props: any) {
+  const { params } = props;
   const data = await fetchEvents();
   const groupName = params.groupName.replace(/-/g, '_');
   

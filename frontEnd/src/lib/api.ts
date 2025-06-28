@@ -2,20 +2,8 @@
 import type { ApiResponse } from '@/types/events';
 
 export async function fetchEvents(): Promise<ApiResponse> {
-  const isDev = process.env.NODE_ENV === 'development';
-  const API_URL = isDev
-    ? 'http://localhost:8787/api/events/local'
-    : 'https://your-worker.workers.dev/api/events/local';
-
-  const res = await fetch(API_URL, { 
-    next: { revalidate: 60 } // 60秒缓存
-  });
-  
-  if (!res.ok) {
-    throw new Error(`API请求失败: ${res.status}`);
-  }
-
-  return res.json();
+    // 无论环境，直接返回本地数据
+    return DEV_EVENTS;
 }
 
 // 开发环境模拟数据
@@ -499,7 +487,7 @@ export const DEV_EVENTS: ApiResponse = {
       "results": {
         "1": "你选择了和他整天讨论。你们很开心，但是成绩下降了。",
         "2": "你选择了背后说他是OP。你们的友谊破裂了。",
-        "3": "你选择了当面说他是OP。他叫来一群同好，打了你一顿。你进医院了！"
+        "3": "你选择了当面说ta是OP。他叫来一群同好，打了你一顿。你进医院了！"
       },
       "end_game_choices": [
         "3"
