@@ -18,6 +18,8 @@ interface Event {
   category?: string;
 }
 
+export const runtime = 'edge';
+
 export default async function Page({ params }: { params: { id: string } }) {
   let data;
   try {
