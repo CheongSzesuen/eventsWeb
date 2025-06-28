@@ -18,8 +18,7 @@ interface Event {
   category?: string;
 }
 
-// 直接写参数类型
-const EventDetailPage = async ({ params }: { params: { id: string } }) => {
+export default async function Page({ params }: { params: { id: string } }) {
   let data;
   try {
     data = await fetchEvents();
@@ -107,5 +106,3 @@ const EventDetailPage = async ({ params }: { params: { id: string } }) => {
     </div>
   );
 }
-
-export default EventDetailPage;
