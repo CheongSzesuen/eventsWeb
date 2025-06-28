@@ -1,5 +1,5 @@
 name = "game-events-api"
-main = "dist/worker.js"
+main = "src/event_handler.js"
 compatibility_date = "2024-07-20"
 compatibility_flags = ["nodejs_compat"]
 
@@ -9,8 +9,5 @@ kv_namespaces = [
 
 [build]
 command = "npm run build"
-outdir = "dist"
-
 [dev]
 port = 8787
-ip = "localhost"
