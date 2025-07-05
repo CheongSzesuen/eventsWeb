@@ -37,23 +37,19 @@ export default function RootLayout({
   return (
     <html lang="zh">
       <Head>
-  {/* 直接使用编译时注入的变量 */}
-  <script 
-    async 
-    src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID || ''}`} 
-  />
+  {/* 移除 async 确保优先执行 */}
+  <script src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`} />
   <script
     dangerouslySetInnerHTML={{
       __html: `
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', '${process.env.NEXT_PUBLIC_GA_ID || ''}');
+        gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}');
       `
     }}
   />
 </Head>
-
 
       <body className="bg-white min-h-screen">
         <NavBar 

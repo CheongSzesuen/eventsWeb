@@ -2,8 +2,8 @@
 const nextConfig = {
   reactStrictMode: true,
   env: {
-    // 明确使用 GOOGLE_ANALYTICS 作为前端变量
-    NEXT_PUBLIC_GA_ID: process.env.GOOGLE_ANALYTICS,
+    // 仅转发环境变量，移除硬编码ID
+    NEXT_PUBLIC_GA_ID: process.env.GOOGLE_ANALYTICS, // 完全依赖环境变量
     NEXT_PUBLIC_WORKER_URL: process.env.NEXT_PUBLIC_WORKER_URL,
   },
   serverRuntimeConfig: {
@@ -11,6 +11,9 @@ const nextConfig = {
   }
 };
 
+// 调试日志（构建后自动删除）
+if (process.env.NODE_ENV !== 'production') {
+  console.log('[DEBUG] GA ID:', process.env.GOOGLE_ANALYTICS ? '***MASKED***' : 'undefined');
+}
+
 module.exports = nextConfig;
-console.log('GA ID in build:', process.env.GOOGLE_ANALYTICS); 
-// 构建时应输出真实ID，而不是undefined
