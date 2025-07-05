@@ -68,3 +68,4 @@ Thumbs.db
 .idea/
 
 .wrangler/
+/backEnd/workers/events/geo.js
