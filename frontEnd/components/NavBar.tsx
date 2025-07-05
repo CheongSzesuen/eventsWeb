@@ -1,6 +1,8 @@
 'use client';
 
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import Image from 'next/image';
+import Link from 'next/link';
 
 export default function NavBar({
   isOpen,
@@ -15,6 +17,20 @@ export default function NavBar({
     <header className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm dark:bg-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center h-16">
+          {/* icon */}
+          <Link href="/" className="flex-shrink-0 mr-4">
+            <div className="rounded-lg overflow-hidden"> {/* 圆角 */}
+              <Image
+                src="/icons/icon-v4.png"
+                alt="网站Logo"
+                width={32}
+                height={32}
+                className="h-8 w-8 object-cover hover:opacity-80 transition-opacity"
+                priority
+              />
+            </div>
+          </Link>
+
           {/* 移动端按钮 */}
           {isMobile && (
             <button
