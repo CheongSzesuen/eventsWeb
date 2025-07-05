@@ -37,9 +37,7 @@ export default function RootLayout({
   return (
     <html lang="zh">
       <Head>
-  <title>OK School Life - EventsWeb</title>
-  <meta name="description" content="OK School Life - EventsWeb" />
-  {/* 动态注入 GA 脚本 */}
+  {/* 直接使用编译时注入的变量 */}
   <script 
     async 
     src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID || ''}`} 
@@ -55,6 +53,7 @@ export default function RootLayout({
     }}
   />
 </Head>
+
 
       <body className="bg-white min-h-screen">
         <NavBar 

@@ -12,3 +12,5 @@ const nextConfig = {
 };
 
 module.exports = nextConfig;
+console.log('GA ID in build:', process.env.GOOGLE_ANALYTICS); 
+// 构建时应输出真实ID，而不是undefined
