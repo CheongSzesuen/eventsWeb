@@ -30,14 +30,8 @@ export interface EventGroup {
   description?: string;   // 分组描述 (新增)
 }
 
-export interface GameMetadata {
-  start_options: string[]; // 初始选项
-  version: string;         // 游戏版本 (新增)
-  author?: string;         // 作者信息 (新增)
-}
 
 export interface ApiResponse {
-  metadata: GameMetadata;  // 游戏元数据
   events: Record<string, Event[]>; // 分组事件
   random_events: Event[];  // 随机事件
   statistics?: {           // 统计信息 (新增)

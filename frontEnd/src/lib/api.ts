@@ -4,7 +4,7 @@ import events from '@/data/events.json';
 export async function fetchEvents(): Promise<ApiResponse> {
   const data = events as ApiResponse;
   
-  if (!data.metadata || !data.events || !data.random_events) {
+  if (!data.events || !data.random_events) {
     throw new Error('Invalid events data structure');
   }
   
