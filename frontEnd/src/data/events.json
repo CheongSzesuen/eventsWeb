@@ -68,27 +68,6 @@
         "contributors": [
           "Still Alive"
         ]
-      },
-      {
-        "id": "event_1_4",
-        "question": ">>>test",
-        "choices": {
-          "1": "乘坐电梯",
-          "2": "走楼梯",
-          "3": "不管"
-        },
-        "results": {
-          "1": "test",
-          "2": "test",
-          "3": "test"
-        },
-        "end_game_choices": [
-          "1"
-        ],
-        "achievements": {},
-        "contributors": [
-          "1"
-        ]
       }
     ],
     "group_2": [
