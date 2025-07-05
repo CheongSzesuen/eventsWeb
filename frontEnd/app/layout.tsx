@@ -36,8 +36,7 @@ export default function RootLayout({
 
   return (
     <html lang="zh">
-      <head>
-    <script 
+<script 
       async 
       src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
     />
@@ -51,8 +50,6 @@ export default function RootLayout({
         `,
       }}
     />
-  </head>
-
       <body className="bg-white min-h-screen">
         <NavBar 
           isOpen={isSidebarOpen}
