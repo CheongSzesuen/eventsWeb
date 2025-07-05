@@ -52,6 +52,9 @@ export default function RootLayout({
       }}
     />
     <meta name="msvalidate.01" content="37CAC20B08B5FD887461C6799EC8078B" />
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9932926368910541"
+     crossOrigin="anonymous"></script>
+
     </head>
       <body className="bg-white min-h-screen">
         <NavBar 
