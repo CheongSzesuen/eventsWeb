@@ -5,6 +5,7 @@ import NavBar from '@/components/NavBar';
 import EventSidebar from '@/components/EventSidebar';
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
+
 export default function RootLayout({ 
   children 
 }: { 
@@ -14,21 +15,20 @@ export default function RootLayout({
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-  const checkMobile = () => {
-    const mobile = window.innerWidth < 768;
-    setIsMobile(mobile);
-    if (!mobile) {
-      setIsSidebarOpen(true);
-    } else {
-      setIsSidebarOpen(false);
-    }
-  };
-  
-  checkMobile();
-  window.addEventListener('resize', checkMobile);
-  return () => window.removeEventListener('resize', checkMobile);
-}, []);
-
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setIsSidebarOpen(true);
+      } else {
+        setIsSidebarOpen(false);
+      }
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(prev => !prev);
@@ -37,9 +37,25 @@ export default function RootLayout({
   return (
     <html lang="zh">
       <Head>
-      <title>OK School Life - EventsWeb</title>
-        <meta name="description" content="OK School Life - EventsWeb" />
-      </Head>
+  <title>OK School Life - EventsWeb</title>
+  <meta name="description" content="OK School Life - EventsWeb" />
+  {/* 修改后的 Google Analytics 脚本 */}
+  <script 
+    async 
+    src={`https://www.googletagmanager.com/gtag/js?id=${process.env.GOOGLE_ANALYTICS || ''}`} 
+  />
+  <script
+    dangerouslySetInnerHTML={{
+      __html: `
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '${process.env.GOOGLE_ANALYTICS || ''}');
+      `
+    }}
+  />
+</Head>
+
       <body className="bg-white min-h-screen">
         <NavBar 
           isOpen={isSidebarOpen}
