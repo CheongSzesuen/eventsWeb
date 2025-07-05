@@ -36,6 +36,7 @@ export default function RootLayout({
 
   return (
     <html lang="zh">
+    <head>
 <script 
       async 
       src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
@@ -50,6 +51,8 @@ export default function RootLayout({
         `,
       }}
     />
+    <meta name="msvalidate.01" content="37CAC20B08B5FD887461C6799EC8078B" />
+    </head>
       <body className="bg-white min-h-screen">
         <NavBar 
           isOpen={isSidebarOpen}
