@@ -39,10 +39,10 @@ export default function RootLayout({
       <Head>
   <title>OK School Life - EventsWeb</title>
   <meta name="description" content="OK School Life - EventsWeb" />
-  {/* 修改后的 Google Analytics 脚本 */}
+  {/* 动态注入 GA 脚本 */}
   <script 
     async 
-    src={`https://www.googletagmanager.com/gtag/js?id=${process.env.GOOGLE_ANALYTICS || ''}`} 
+    src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID || ''}`} 
   />
   <script
     dangerouslySetInnerHTML={{
@@ -50,7 +50,7 @@ export default function RootLayout({
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', '${process.env.GOOGLE_ANALYTICS || ''}');
+        gtag('config', '${process.env.NEXT_PUBLIC_GA_ID || ''}');
       `
     }}
   />
