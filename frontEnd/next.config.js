@@ -2,10 +2,10 @@
 const nextConfig = {
   reactStrictMode: true,
   env: {
-    // 仅转发环境变量，移除硬编码ID
-    NEXT_PUBLIC_GA_ID: process.env.GOOGLE_ANALYTICS, // 完全依赖环境变量
-    NEXT_PUBLIC_WORKER_URL: process.env.NEXT_PUBLIC_WORKER_URL,
-  },
+  NEXT_PUBLIC_GA_ID: process.env.NEXT_PUBLIC_GA_ID, // 直接使用 .env.local 中的值
+  NEXT_PUBLIC_WORKER_URL: process.env.NEXT_PUBLIC_WORKER_URL,
+},
+
   serverRuntimeConfig: {
     WORKER_URL: process.env.WORKER_URL
   }
