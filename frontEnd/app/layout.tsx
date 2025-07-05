@@ -4,7 +4,7 @@ import './globals.css';
 import NavBar from '@/components/NavBar';
 import EventSidebar from '@/components/EventSidebar';
 import { useState, useEffect } from 'react';
-
+import Head from 'next/head';
 export default function RootLayout({ 
   children 
 }: { 
@@ -31,6 +31,10 @@ export default function RootLayout({
 
   return (
     <html lang="zh">
+      <Head>
+      <title>OK School Life - EventsWeb</title>
+        <meta name="description" content="OK School Life - EventsWeb" />
+      </Head>
       <body className="bg-white min-h-screen">
         <NavBar 
           isOpen={isSidebarOpen}

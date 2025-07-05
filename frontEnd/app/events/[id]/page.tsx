@@ -1,5 +1,7 @@
 import { fetchEvents } from '@/lib/api';
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
+import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
 interface ChoiceResult {
   text: string;
@@ -43,11 +45,20 @@ export default async function Page({ params }: { params: { id: string } }) {
   if (!event) return notFound();
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">
-        {event.question.replace(/^>>>/, '').trim()}
-      </h1>
-      
+    <div className="max-w-4xl mx-auto px-4">
+      {/* 顶部：返回按钮和标题横向排列 */}
+      <div className="flex items-center gap-2 mt-8 mb-6">
+        <Link
+          href="/events"
+          className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition -ml-4"
+          aria-label="返回"
+        >
+          <ArrowLeftIcon className="w-6 h-6 text-gray-500 dark:text-gray-300" />
+        </Link>
+        <h1 className="text-2xl font-bold flex-1 text-left">
+          {event.question.replace(/^>>>/, '').trim()}
+        </h1>
+      </div>
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
         <div className="mb-6">
           <h2 className="text-lg font-semibold mb-3">选项与结果</h2>
