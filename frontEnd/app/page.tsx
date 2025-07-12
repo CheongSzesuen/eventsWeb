@@ -37,16 +37,16 @@ export default async function HomePage() {
           ...(school?.events?.start?.map(event => ({
             ...event,
             school: school.name,
-            type: 'school_start'
+            type: 'school_start' as const,
           })) || []),
           ...(school?.events?.special?.map(event => ({
             ...event,
             school: school.name,
-            type: 'school_special'
+            type: 'school_special' as const,
           })) || [])
         ]
-      ) || []
-    ) || []
+      )
+    )
   );
 
   // 合并所有事件来源
