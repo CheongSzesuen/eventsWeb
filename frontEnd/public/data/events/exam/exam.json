@@ -1,0 +1,72 @@
+{
+  "exam_events": [
+  {
+    "id": "exam_1",
+    "question": ">>>考试：sin x = cos ____？",
+    "choices": {
+      "1": "x + π",
+      "2": "x - π/2",
+      "3": "x + π/2"
+    },
+    "results": {
+      "1": "你选择了x + π。你错得太离谱，被开除了！",
+      "2": "你选择了x - π/2。你过关！",
+      "3": "你选择了x + π/2。你考得很差，父母把你骂了一顿。"
+    },
+    "end_game_choices": ["1"],
+    "achievements": {},
+    "contributors": ["Still Alive"]
+  },
+  {
+    "id": "exam_2",
+    "question": ">>>考试：sin 2x = ____？",
+    "choices": {
+      "1": "2(sinx)(cosx)",
+      "2": "π",
+      "3": "2x"
+    },
+    "results": {
+      "1": "你选择了2(sinx)(cosx)。你过关！",
+      "2": "你选择了π。你错得太离谱，被开除了！",
+      "3": "你选择了2x。你考得很差，父母把你骂了一顿。"
+    },
+    "end_game_choices": ["2"],
+    "achievements": {},
+    "contributors": ["Still Alive"]
+  },
+  {
+    "id": "exam_3",
+    "question": ">>>考试：中国历史上的第一位皇帝是？",
+    "choices": {
+      "1": "泰始皇",
+      "2": "夏禹",
+      "3": "以上都不是"
+    },
+    "results": {
+      "1": "你选择了泰始皇。你错得太离谱，被开除了！",
+      "2": "你选择了夏禹。你考得很差，父母把你骂了一顿。",
+      "3": "你选择了以上都不是。你得到了全班最高分，你感到很开心。"
+    },
+    "end_game_choices": ["1"],
+    "achievements": { "3": "视力5.0" },
+    "contributors": ["Still Alive"]
+  },
+  {
+    "id": "exam_4",
+    "question": ">>>考试：tan x/2的周期是？",
+    "choices": {
+      "1": "x",
+      "2": "π/2",
+      "3": "2π"
+    },
+    "results": {
+      "1": "你选择了x。你错得太离谱，被开除了！游戏结束。",
+      "2": "你选择了π/2。你考得很差，父母把你骂了一顿。",
+      "3": "你选择了2π。你过关！"
+    },
+    "end_game_choices": ["1"],
+    "achievements": {},
+    "contributors": ["Still Alive"]
+  }
+  ]
+}

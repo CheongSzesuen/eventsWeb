@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getSchoolsByCity } from '@/lib/api';
+import { getSchoolsByCity } from '@/lib/fetchEvents';
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
 // 1. 定义省份类型

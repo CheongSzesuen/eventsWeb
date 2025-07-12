@@ -1,3 +1,4 @@
+// frontEnd/app/contribute/page.tsx
 'use client';
 
 import { Suspense, useState } from 'react';
@@ -23,9 +24,9 @@ interface Option {
 
 function ContributeContent() {
   const searchParams = useSearchParams();
-  const type = searchParams.get('type');
-  const city = searchParams.get('city');
-  const school = searchParams.get('school');
+  const type = searchParams?.get('type') || '';
+  const city = searchParams?.get('city') || '';
+  const school = searchParams?.get('school') || '';
 
   const [options, setOptions] = useState<Option[]>([
     {
@@ -255,23 +256,23 @@ function ContributeContent() {
                           value={option.achievement}
                           onChange={(e) => handleOptionChange(option.id, 'achievement', e.target.value)}
                         />
-                      <div className="flex items-center">
-                        <label className="relative flex items-center cursor-pointer gap-2">
-                          <input
-                            type="checkbox"
-                            id={`endGame-${option.id}`}
-                            className="sr-only peer"
-                            checked={option.isEndGame}
-                            onChange={(e) => handleOptionChange(option.id, 'isEndGame', e.target.checked)}
-                          />
-                          <div className="w-5 h-5 border border-gray-300 rounded peer-checked:bg-blue-600 peer-checked:border-blue-600 flex items-center justify-center transition-colors">
-                            <svg className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                          </div>
-                          <span className="text-sm text-gray-700">是否结束游戏</span>
-                        </label>
-                      </div>
+                        <div className="flex items-center">
+                          <label className="relative flex items-center cursor-pointer gap-2">
+                            <input
+                              type="checkbox"
+                              id={`endGame-${option.id}`}
+                              className="sr-only peer"
+                              checked={option.isEndGame}
+                              onChange={(e) => handleOptionChange(option.id, 'isEndGame', e.target.checked)}
+                            />
+                            <div className="w-5 h-5 border border-gray-300 rounded peer-checked:bg-blue-600 peer-checked:border-blue-600 flex items-center justify-center transition-colors">
+                              <svg className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                            <span className="text-sm text-gray-700">是否结束游戏</span>
+                          </label>
+                        </div>
                       </div>
                     )}
 

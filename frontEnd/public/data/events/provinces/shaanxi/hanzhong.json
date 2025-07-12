@@ -1,0 +1,337 @@
+{
+    "schools": [
+        {
+            "id": "yangxian-high-school",
+            "name": "羊县中学",
+            "events": {
+                "start": [
+                    {
+                        "id": "start_yangxian-high-school_1",
+                        "question": ">>>第一周开家长会，校长讲话时间超出预计时间一小时，导致放学时间延迟，你会？",
+                        "choices": {
+                            "1": "继续听演讲",
+                            "2": "请假回家",
+                            "3": "向老师投诉"
+                        },
+                        "results": {
+                            "1": "你选择了继续听演讲。演讲结束后，你感到很疲惫。",
+                            "2": "你选择了请假回家。你被家长骂了。",
+                            "3": "你选择了向老师投诉。你被开除了。老师难道能管校长的事？"
+                        },
+                        "end_game_choices": [
+                            "3"
+                        ],
+                        "achievements": {},
+                        "contributors": [
+                            "Still Alive"
+                        ]
+                    },
+                    {
+                        "id": "start_yangxian-high-school_2",
+                        "question": ">>>面对单休制，你开始了怎样的思考？",
+                        "choices": {
+                            "1": "符合无钱补课者的利益",
+                            "2": "不合理的制度",
+                            "3": "有的学校两周一放，知足常乐"
+                        },
+                        "results": {
+                            "1": "你选择了符合无钱补课者的利益。你感到很开心。",
+                            "2": "你选择了不合理的制度。你开始对此抱有异见。",
+                            "3": "你选择了有的学校两周一放，知足常乐。你感到压抑且自由。"
+                        },
+                        "end_game_choices": [],
+                        "achievements": {},
+                        "contributors": [
+                            "Still Alive"
+                        ]
+                    },
+                    {
+                        "id": "start_yangxian-high-school_3",
+                        "question": ">>>看到学校的电梯，你会怎么做？",
+                        "choices": {
+                            "1": "乘坐电梯",
+                            "2": "走楼梯",
+                            "3": "不管"
+                        },
+                        "results": {
+                            "1": "你选择了乘坐电梯。你违反了学生条例，被开除了！",
+                            "2": "你选择了走楼梯。你感到很累。",
+                            "3": "你选择了不管。好像什么也没有发生。"
+                        },
+                        "end_game_choices": [
+                            "1"
+                        ],
+                        "achievements": {},
+                        "contributors": [
+                            "Still Alive"
+                        ]
+                    }
+                ],
+                "special": []
+            }
+        },
+        {
+            "id": "hanzhong-high-school-of-shaanxi-province",
+            "name": "闪西省汗忠中学",
+            "events": {
+                "start": [
+                    {
+                        "id": "start_hanzhong-high-school-of-shaanxi-province_1",
+                        "question": ">>>军训时你感到身体不适，你会？",
+                        "choices": {
+                            "1": "烈日下硬撑着",
+                            "2": "向老师说明",
+                            "3": "大声呵斥军训不人性化"
+                        },
+                        "results": {
+                            "1": "你选择了烈日下硬撑着。你中暑进医院了！",
+                            "2": "你选择了向老师说明。老师夸你勇敢，让你休息了。",
+                            "3": "你选择了大声呵斥军训不人性化。你被教官骂了一顿，心情很不好。"
+                        },
+                        "end_game_choices": [
+                            "1"
+                        ],
+                        "achievements": {},
+                        "contributors": [
+                            "Still Alive"
+                        ]
+                    },
+                    {
+                        "id": "start_hanzhong-high-school-of-shaanxi-province_2",
+                        "question": ">>>社团招新，你会？",
+                        "choices": {
+                            "1": "加入社团",
+                            "2": "不加入社团",
+                            "3": "向老师举报"
+                        },
+                        "results": {
+                            "1": "你选择了加入社团。你感到很开心。",
+                            "2": "你选择了不加入社团。你感到很无聊。",
+                            "3": "你选择了向老师举报。老师告诉你这是正常操作。"
+                        },
+                        "end_game_choices": [],
+                        "achievements": {},
+                        "contributors": [
+                            "Still Alive"
+                        ]
+                    },
+                    {
+                        "id": "start_hanzhong-high-school-of-shaanxi-province_3",
+                        "question": ">>>舍友睡觉呼噜声很大，你会？",
+                        "choices": {
+                            "1": "忍耐",
+                            "2": "向老师投诉",
+                            "3": "把舍友打一顿"
+                        },
+                        "results": {
+                            "1": "你选择了忍耐。你整晚没睡好，你很烦躁。",
+                            "2": "你选择了向老师投诉。老师告诉你这是正常现象，你很无奈。",
+                            "3": "你选择了把舍友打一顿。你因违反校规被开除！"
+                        },
+                        "end_game_choices": [
+                            "3"
+                        ],
+                        "achievements": {},
+                        "contributors": [
+                            "Still Alive"
+                        ]
+                    }
+                ],
+                "special": [
+                    {
+                        "id": "special_hanzhong-high-school-of-shaanxi-province_1",
+                        "question": ">>>你是一个走读生，早上你要买早饭，你决定？",
+                        "choices": {
+                            "1": "走西门，吃食堂",
+                            "2": "走北门，吃饭团",
+                            "3": "走北门，吃煎饼"
+                        },
+                        "results": {
+                            "1": "皮肤怎么黑黑的。",
+                            "2": "大米饭使你的胃反酸，你很难受。",
+                            "3": "5元钱的山东特产煎饼，你很满足。"
+                        },
+                        "end_game_choices": [],
+                        "achievements": {"1": "内个"},
+                        "contributors": ["Tomato"]
+                    },
+                    {
+                        "id": "special_hanzhong-high-school-of-shaanxi-province_2",
+                        "question": ">>>你获得了Sweet的讲课PPT的最后一页的“通关小曲”",
+                        "choices": {
+                            "1": "放来听听",
+                            "2": "插入到数学老师PPT第一页",
+                            "3": "发到汗忠中学大群并标明——Sweetの小曲"
+                        },
+                        "results": {
+                            "1": "被其他老师探头听到，但好像什么也没发生。",
+                            "2": "教室里充满了快活的氛围，数学老师也笑了，询问是谁干的，你被出卖了。但什么都没发生。",
+                            "3": "什么也没发生"
+                        },
+                        "end_game_choices": [],
+                        "achievements": {"2": "孤胆英雄"},
+                        "contributors": ["Tomato"]
+                    },
+                    {
+                        "id": "special_hanzhong-high-school-of-shaanxi-province_3",
+                        "question": ">>>你是高一会考学生，你在本校考试，你在高二教学楼考试，你想上厕所你决定？",
+                        "choices": {
+                            "1": "边走边认真复习考试科目",
+                            "2": "探索一下高二教学楼",
+                            "3": "招呼自己的同学一起"
+                        },
+                        "results": {
+                            "1": "你走到了厕所，但是发现了异性。高二厕所男右女左，和高一刚好相反，你走错了！你紧张地跑出厕所",
+                            "2": "你发现了盲点——高二厕所男右女左，和高一刚好相反。你也看到了有一些走错的。",
+                            "3": [
+                                {
+                                    "text": "你们之中有人发现了高二厕所男右女左，和高一刚好相反。你们庆幸自己没走错。",
+                                    "prob": 0.5
+                                },
+                                {
+                                    "text": "你们聊的很开心，结果进厕所发现有异性，高二厕所男右女左，和高一刚好相反，你们走错了！",
+                                    "prob": 0.5
+                                }
+                            ]
+                        },
+                        "end_game_choices": [],
+                        "achievements": {
+                            "1": "校园流言中的“有个人”",
+                            "2": "华生"
+                        },
+                        "contributors": ["WaiJade"]
+                    },
+                    {
+                        "id": "special_hanzhong-high-school-of-shaanxi-province_4",
+                        "question": ">>>你与后桌在数学课前打赌，你打赌",
+                        "choices": {
+                            "1": "老师左手拿尺子",
+                            "2": "老师右手拿尺子",
+                            "3": "老师不拿尺子"
+                        },
+                        "results": {
+                            "1": [
+                                {
+                                    "text": "正↗确↗！（毛毛音）",
+                                    "prob": 0.5
+                                },
+                                {
+                                    "text": "错↗↘了↗→（毛毛音）",
+                                    "prob": 0.5
+                                }
+                            ],
+                            "2": [
+                                {
+                                    "text": "正↗确↗！（毛毛音）",
+                                    "prob": 0.5
+                                },
+                                {
+                                    "text": "错↗↘了↗→（毛毛音）",
+                                    "prob": 0.5
+                                }
+                            ],
+                            "3": [
+                                {
+                                    "text": "正↗确↗！（毛毛音）",
+                                    "prob": 0.5
+                                },
+                                {
+                                    "text": "错↗↘了↗→（毛毛音）",
+                                    "prob": 0.5
+                                }
+                            ]
+                        },
+                        "end_game_choices": [],
+                        "contributors": ["YaXuan"]
+                    },
+                    {
+                        "id": "special_hanzhong-high-school-of-shaanxi-province_5",
+                        "question": ">>>你的化学老师请假了，你希望哪个老师来：",
+                        "choices": {
+                            "1": "MC",
+                            "2": "陈晓俊",
+                            "3": "毛毛"
+                        },
+                        "results": {
+                            "1": "你喜欢这个男人的化学课，你觉得这才是教师，并向他看齐。",
+                            "2": "你三天没下过课，累得进医院了。",
+                            "3": "毛毛一言不发只是一味地画图然后让你出答案，你有点恼火，但还能接受。并且你学会了”错↗↘了↗→（毛毛音）”"
+                        },
+                        "end_game_choices": ["2"],
+                        "contributors": ["WaiJade", "GuoHao"]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "hanzhong-long-gang-school",
+            "name": "汗忠市龙港学校",
+            "events": {
+                "start": [
+                    {
+                        "id": "start_hanzhong-long-gang-school_1",
+                        "question": ">>>开学考试，你发现试题很难，你选择？",
+                        "choices": {
+                            "1": "大声呼救",
+                            "2": "硬着头皮做",
+                            "3": "把试卷撕了"
+                        },
+                        "results": {
+                            "1": "你选择了大声呼救。老师以为你有精神病，将你遣返回原籍。",
+                            "2": "你选择了硬着头皮做。你考得很差，父母把你骂了一顿。",
+                            "3": "你选择了把试卷撕了。老师夸你有胆量，并给你一套高考真题。"
+                        },
+                        "end_game_choices": [
+                            "1"
+                        ],
+                        "achievements": {},
+                        "contributors": [
+                            "Still Alive"
+                        ]
+                    },
+                    {
+                        "id": "start_hanzhong-long-gang-school_2",
+                        "question": ">>>看到有同学乘坐黑色高级车，你会？",
+                        "choices": {
+                            "1": "巴结这位同学",
+                            "2": "去看ta的父母是何方神圣",
+                            "3": "偷拍ta家的车，并发布到网上"
+                        },
+                        "results": {
+                            "1": "你选择了巴结这位同学。你成为了ta的众多跟班之一。",
+                            "2": "你选择了去看ta的父母是何方神圣。ta的父亲对你说：好好学，争取以后能当上ta的秘书。",
+                            "3": "你选择了偷拍ta家的车，并发布到网上。一封邮件让你删除视频，第二天你因为进教室先迈左脚被开除！"
+                        },
+                        "end_game_choices": [
+                            "3"
+                        ],
+                        "achievements": {},
+                        "contributors": [
+                            "Still Alive"
+                        ]
+                    },
+                    {
+                        "id": "start_hanzhong-long-gang-school_3",
+                        "question": ">>>放学后时间很紧，你选择？",
+                        "choices": {
+                            "1": "先写作业",
+                            "2": "先洗澡",
+                            "3": "去天台看夜景"
+                        },
+                        "results": {
+                            "1": "你选择了先写作业。你写到熄灯时间也没写完。",
+                            "2": "你选择了先洗澡。你感到很舒服，但是被没写作业的恐慌占据。",
+                            "3": "你选择了去天台看夜景。班主任发现了你，让心理老师和你谈心一晚上。你很疲惫。"
+                        },
+                        "end_game_choices": [],
+                        "achievements": {},
+                        "contributors": [
+                            "Still Alive"
+                        ]
+                    }
+                ],
+                "special": []
+            }
+        }
+    ]
+}

@@ -1,33 +1,78 @@
-'use client'; // 必须保留
-import { useRouter } from 'next/navigation';
+// frontEnd/components/EventCard.tsx
+'use client';
+
+import { usePathname } from 'next/navigation';
 import type { Event } from '@/types/events';
 
-export default function EventCard({ event }: { event: Event }) {
-  const router = useRouter();
+export default function EventCard({ 
+  event,
+  showBadge = true 
+}: { 
+  event: Event;
+  showBadge?: boolean;
+}) {
+  const pathname = usePathname();
 
-  const handleClick = () => {
-    router.push(`/events/${event.id}`);
+  // 根据 event.type 设置标签文本
+  const getEventBadgeText = () => {
+    if (event.type === 'exam') {
+      return '📝 考试事件';
+    } else if (event.type === 'random') {
+      return '🎲 随机事件';
+    } else if (event.type === 'school_start') {
+      return `🏫 ${event.school || '未知学校'} - 开始事件`;
+    } else if (event.type === 'school_special') {
+      return `🏫 ${event.school || '未知学校'} - 特殊事件`;
+    }
+    return '';
   };
 
   return (
     <div 
-      className="h-full bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-md transition-all
-                 cursor-pointer select-none" // 添加点击反馈样式
-      onClick={handleClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => e.key === 'Enter' && handleClick()}
+      className="h-full bg-white dark:bg-gray-800 rounded-lg shadow p-4 hover:shadow-lg transition-all
+                 select-none"
     >
-      <h3 className="text-lg font-semibold mb-2 line-clamp-2">
+      {showBadge && (
+        <div className="flex gap-2 mb-2 flex-wrap">
+          <span className="text-xs px-2 py-1 bg-gray-200 text-gray-700 rounded-full">
+            {getEventBadgeText()}
+          </span>
+        </div>
+      )}
+      
+      <h3 className="font-semibold line-clamp-2 mb-2">
         {event.question.replace(/^>>>/, '').trim()}
       </h3>
-      <div className="text-sm text-gray-500 mb-3">
-        {Object.keys(event.choices).length} 个选项
+      
+      <div className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+        {Object.entries(event.choices).map(([key, text]) => (
+          <div key={key} className="flex gap-2">
+            <span className="font-medium">{key}.</span>
+            <span className="line-clamp-1">{text}</span>
+          </div>
+        ))}
       </div>
-      <div className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
-        {Array.isArray(event.results[Object.keys(event.choices)[0]]) 
-          ? (event.results[Object.keys(event.choices)[0]] as any[])[0].text
-          : event.results[Object.keys(event.choices)[0]] as string}
+      
+      <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+        {Object.entries(event.results).map(([resultKey, resultText]) => {
+          if (Array.isArray(resultText)) {
+            return (
+              <div key={resultKey} className="space-y-1">
+                {resultText.map((result, index) => (
+                  <div key={index}>
+                    <strong>{resultKey}:</strong> {result.text} (概率: {result.prob * 100}%)
+                  </div>
+                ))}
+              </div>
+            );
+          } else {
+            return (
+              <div key={resultKey}>
+                <strong>{resultKey}:</strong> {resultText}
+              </div>
+            );
+          }
+        })}
       </div>
     </div>
   );

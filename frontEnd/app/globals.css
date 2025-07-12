@@ -37,6 +37,19 @@ body {
   background-color: rgba(75, 85, 99, 0.5);
 }
 
+/* 自定义group类动画 */
+@layer utilities {
+  .group-province-open\:rotate-90 [open] & {
+    transform: rotate(90deg);
+  }
+  .group-city-open\:rotate-90 [open] & {
+    transform: rotate(90deg);
+  }
+  .group-school-open\:rotate-90 [open] & {
+    transform: rotate(90deg);
+  }
+}
+
 /* 侧边栏动画 */
 .sidebar-transition {
   transition-property: transform, opacity;

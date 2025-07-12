@@ -1,3 +1,4 @@
+// frontEnd/components/NavBar.tsx
 'use client';
 
 import { Bars3Icon, XMarkIcon, PlusIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
@@ -20,7 +21,8 @@ export default function NavBar({
   const dropdownRef = useRef<HTMLDivElement>(null);
   let timeoutId: NodeJS.Timeout;
 
-  // 处理鼠标移出时的延迟（仅桌面端）
+  const navBarClasses = "w-full bg-white shadow-sm";
+
   const handleMouseLeave = () => {
     if (!isMobile) {
       timeoutId = setTimeout(() => {
@@ -29,12 +31,10 @@ export default function NavBar({
     }
   };
 
-  // 清除定时器
   const cancelTimeout = () => {
     clearTimeout(timeoutId);
   };
 
-  // 点击外部关闭
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -47,13 +47,6 @@ export default function NavBar({
     };
   }, []);
 
-  // 移动端点击切换
-  const handleMobileToggle = () => {
-    if (isMobile) {
-      setShowDropdown(!showDropdown);
-    }
-  };
-
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (searchQuery.trim() !== '') {
@@ -61,7 +54,6 @@ export default function NavBar({
     }
   };
 
-  // 修改 handleContributeClick 函数
   const handleContributeClick = (type: string) => {
     switch(type) {
       case 'random':
@@ -78,10 +70,9 @@ export default function NavBar({
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm dark:bg-gray-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex justify-between h-16 items-center">
+    <header className={navBarClasses}>
+      <div className="px-4 sm:px-6 flex justify-between h-16 items-center max-w-[100vw]">
         <div className="flex items-center">
-          {/* 网站Logo */}
           <Link href="/" className="flex-shrink-0 mr-4">
             <div className="rounded-lg overflow-hidden">
               <Image
@@ -95,52 +86,42 @@ export default function NavBar({
             </div>
           </Link>
           
-          {/* 侧边栏切换按钮 */}
-          {isMobile && (
-            <button
-              className="nav-button nav-button-default mr-4"
-              onClick={onToggle}
-              aria-label={isOpen ? "关闭菜单" : "打开菜单"}
-            >
-              {isOpen ? (
-                <XMarkIcon className="h-6 w-6 text-gray-700 dark:text-gray-300" />
+          <button
+            className="nav-button nav-button-default mr-4"
+            onClick={onToggle}
+            aria-label={isOpen ? "关闭菜单" : "打开菜单"}
+          >
+            {isMobile ? (
+              isOpen ? (
+                <XMarkIcon className="h-6 w-6 text-gray-700" />
               ) : (
-                <Bars3Icon className="h-6 w-6 text-gray-700 dark:text-gray-300" />
-              )}
-            </button>
-          )}
-          {!isMobile && (
-            <button
-              className="nav-button nav-button-default mr-4"
-              onClick={onToggle}
-              aria-label="切换侧边栏"
-            >
-              <Bars3Icon className="h-6 w-6 text-gray-700 dark:text-gray-300" />
-            </button>
-          )}
+                <Bars3Icon className="h-6 w-6 text-gray-700" />
+              )
+            ) : (
+              <Bars3Icon className="h-6 w-6 text-gray-700" />
+            )}
+          </button>
         </div>
-        
-        {/* 搜索框 */}
+        {/* 搜索框 
         <form onSubmit={handleSearch} className="flex-1 max-w-xl mx-4">
           <div className="relative">
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="搜索事件问题、选项或结果..."
-              className="w-full h-10 pl-4 pr-10 rounded-lg bg-gray-100 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+              placeholder="搜索..."
+              className="w-full h-10 pl-4 pr-10 rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button 
               type="submit"
-              className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
               aria-label="搜索"
             >
               <MagnifyingGlassIcon className="w-5 h-5" />
             </button>
           </div>
         </form>
-        
-        {/* 蓝色贡献按钮 */}
+        */}
         <div 
           className="relative"
           ref={dropdownRef}
@@ -153,7 +134,7 @@ export default function NavBar({
           onMouseLeave={handleMouseLeave}
         >
           <button
-            onClick={handleMobileToggle}
+            onClick={() => setShowDropdown(!showDropdown)}
             className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md whitespace-nowrap"
           >
             <span className="flex items-center">
@@ -163,8 +144,7 @@ export default function NavBar({
             <ChevronDownIcon className={`w-4 h-4 ml-1 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
           </button>
           
-          {/* 下拉菜单 - 调整宽度和文字居中 */}
-          {(showDropdown || (!isMobile && showDropdown)) && (
+          {showDropdown && (
             <div 
               className={`absolute right-0 mt-1 bg-white rounded-md shadow-lg z-50 border border-gray-200 ${isMobile ? 'animate-fade-in' : ''}`}
               onMouseEnter={!isMobile ? cancelTimeout : undefined}

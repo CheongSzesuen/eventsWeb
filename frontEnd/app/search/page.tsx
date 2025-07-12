@@ -1,4 +1,9 @@
-import { searchEvents } from '@/lib/api';
+// frontEnd/app/search/page.tsx
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { searchEvents } from '@/lib/searchEvents';
 import type { Event } from '@/types/events';
 import Link from 'next/link';
 
@@ -35,21 +40,35 @@ function SearchResult({ event }: { event: Event }) {
     </Link>
   );
 }
-export const runtime = 'edge';
 
-export default async function SearchPage({
-  searchParams
-}: {
-  searchParams: { q: string }
-}) {
-  const query = searchParams.q?.trim() || '';
-  let results: Event[] = [];
-  
-  try {
-    results = await searchEvents(query);
-  } catch (error) {
-    console.error('搜索出错:', error);
-  }
+export default function SearchPage() {
+  const searchParams = useSearchParams();
+  const query = searchParams.get('q')?.trim() || '';
+  const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [eventsPerPage] = useState(10);
+
+  useEffect(() => {
+    const searchAndFilter = async () => {
+      const results = await searchEvents(query);
+      setFilteredEvents(results);
+      setCurrentPage(1); // 每次搜索后重置到第一页
+    };
+
+    if (query) {
+      searchAndFilter();
+    } else {
+      setFilteredEvents([]);
+    }
+  }, [query]);
+
+  // 获取当前页面的事件
+  const indexOfLastEvent = currentPage * eventsPerPage;
+  const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
+  const currentEvents = filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent);
+
+  // 分页按钮
+  const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -57,9 +76,45 @@ export default async function SearchPage({
         {query ? `"${query}"的搜索结果` : '所有事件'}
       </h1>
       
-      {results.length > 0 ? (
+      {filteredEvents.length > 0 ? (
+        <div className="mb-4">
+          <select 
+            className="border p-2 rounded-lg"
+            onChange={(e) => {
+              const sortType = e.target.value;
+              let sortedEvents = [...filteredEvents];
+              switch(sortType) {
+                case 'type':
+                  sortedEvents.sort((a, b) => (a.type || '').localeCompare(b.type || ''));
+                  break;
+                case 'school':
+                  sortedEvents.sort((a, b) => (a.school || '').localeCompare(b.school || ''));
+                  break;
+                case 'province':
+                  sortedEvents.sort((a, b) => (a.provinceId || '').localeCompare(b.provinceId || ''));
+                  break;
+                case 'city':
+                  sortedEvents.sort((a, b) => (a.cityId || '').localeCompare(b.cityId || ''));
+                  break;
+                default:
+                  break;
+              }
+              setFilteredEvents(sortedEvents);
+              setCurrentPage(1); // 每次排序后重置到第一页
+            }}
+          >
+            <option value="default">默认排序</option>
+            <option value="type">按类型排序</option>
+            <option value="school">按学校排序</option>
+            <option value="province">按省份排序</option>
+            <option value="city">按城市排序</option>
+          </select>
+        </div>
+      ) : null}
+
+      {currentEvents.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {results.map(event => (
+          {currentEvents.map(event => (
             <SearchResult key={event.id} event={event} />
           ))}
         </div>
@@ -71,15 +126,28 @@ export default async function SearchPage({
         </div>
       ) : (
         <div className="text-center py-12">
-          <p className="text-gray-500 text-lg dark:text-400">
+          <p className="text-gray-500 text-lg dark:text-gray-400">
             请输入搜索关键词
           </p>
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-8">
+          {Array.from({ length: totalPages }, (_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentPage(index + 1)}
+              className={`px-4 py-2 mx-2 rounded-lg ${currentPage === index + 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}
+            >
+              {index + 1}
+            </button>
+          ))}
         </div>
       )}
     </div>
   );
 }
-
 
 interface EventResult {
   text: string;
