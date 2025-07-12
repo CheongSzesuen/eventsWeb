@@ -22,11 +22,11 @@ export default async function ProvincePage({ params }: { params: { province: str
                 {schoolIndex > 0 && <div className="border-t-2 border-gray-300 mt-4 mb-4"></div>} {/* 学校之间的稍短分割线 */}
                 <h3 className="text-2xl font-semibold mb-2">{school.name}</h3>
                 <div className="ml-4"> {/* 学校内部内容往右移错开一点 */}
-                  {school.events.start && school.events.start.length > 0 && (
+                  {school.events.start?.length > 0 && (
                     <>
                       <h4 className="text-xl font-semibold mb-2">开学事件</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {school.events.start.map((event, eventIndex) => (
+                        {school.events.start?.map((event, eventIndex) => (
                           <EventCard 
                             key={event.id}
                             event={{
@@ -46,12 +46,12 @@ export default async function ProvincePage({ params }: { params: { province: str
                       </div>
                     </>
                   )}
-                  {school.events.special && school.events.special.length > 0 && (
+                  {school.events.special?.length > 0 && (
                     <>
-                      {school.events.start && school.events.start.length > 0 && <div className="border-t border-gray-400 mt-4 mb-4"></div>} {/* 开学事件卡片和特殊事件字样之间 */}
+                      {school.events.start?.length > 0 && <div className="border-t border-gray-400 mt-4 mb-4"></div>} {/* 开学事件卡片和特殊事件字样之间 */}
                       <h4 className="text-xl font-semibold mb-2 mt-4">特殊事件</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {school.events.special.map((event, eventIndex) => (
+                        {school.events.special?.map((event, eventIndex) => (
                           <EventCard 
                             key={event.id}
                             event={{
