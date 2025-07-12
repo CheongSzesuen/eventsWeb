@@ -37,16 +37,16 @@ export default async function HomePage() {
           ...(school?.events?.start?.map(event => ({
             ...event,
             school: school.name,
-            type: 'school_start' as const,
+            type: 'school_start' as const
           })) || []),
           ...(school?.events?.special?.map(event => ({
             ...event,
             school: school.name,
-            type: 'school_special' as const,
+            type: 'school_special' as const
           })) || [])
         ]
-      )
-    )
+      ) || []
+    ) || []
   );
 
   // 合并所有事件来源
@@ -77,20 +77,20 @@ export default async function HomePage() {
       <h1 className="text-3xl font-bold mb-8">首页事件</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {allEvents.map((event) => (
-          <EventCard
-            key={event.id}
-            event={{
-              ...event,
-              question: event.question || "未命名事件",
-              choices: event.choices || {
-                default: "默认选项"
-              },
-              results: event.results || {
-                default: "默认结果"
-              }
-            }}
-            className="hover:shadow-lg transition-shadow duration-200"
-          />
+          <div key={event.id} className="hover:shadow-lg transition-shadow duration-200">
+            <EventCard
+              event={{
+                ...event,
+                question: event.question || "未命名事件",
+                choices: event.choices || {
+                  default: "默认选项"
+                },
+                results: event.results || {
+                  default: "默认结果"
+                }
+              }}
+            />
+          </div>
         ))}
       </div>
     </>
