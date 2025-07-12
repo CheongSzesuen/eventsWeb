@@ -26,7 +26,7 @@ function SearchResult({ event }: { event: Event }) {
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   {typeof event.results[key] === 'string' 
                     ? (event.results[key] as string).slice(0, 50) + '...'
-                    : (event.results[key] as EventResult[])[0].text.slice(0, 50) + '...'
+                    : (event.results[key] as any[])[0]?.text?.slice(0, 50) + '...' ?? ''
                   }
                 </p>
               )}
@@ -43,7 +43,7 @@ function SearchResult({ event }: { event: Event }) {
 
 export default function SearchPage() {
   const searchParams = useSearchParams();
-  const query = searchParams.get('q')?.trim() || '';
+  const query = searchParams?.get('q')?.trim() || ''; // 使用可选链防止 null 报错
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [eventsPerPage] = useState(10);
@@ -138,7 +138,10 @@ export default function SearchPage() {
             <button
               key={index}
               onClick={() => setCurrentPage(index + 1)}
-              className={`px-4 py-2 mx-2 rounded-lg ${currentPage === index + 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}
+              className={`px-4 py-2 mx-2 rounded-lg ${currentPage === index + 1 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+              }`}
             >
               {index + 1}
             </button>
