@@ -9,6 +9,6 @@ module.exports = {
     return config;
   },
   env: {
-    NEXT_PUBLIC_WORKER_URL: process.env.NEXT_PUBLIC_WORKER_URL,
+    NEXT_PUBLIC_WORKER_URL: process.env.NEXT_PUBLIC_WORKER_URL || '默认值'
   },
 };
