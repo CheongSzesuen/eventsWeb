@@ -2,105 +2,14 @@
 import { getCityData } from '@/lib/fetchEvents';
 import EventCard from '@/components/EventCard';
 
-interface SchoolPageProps {
-  params: {
-    province: string;
-    city: string;
-    school: string;
-  };
-  cityData: CityData | null;
-  schoolData: SchoolData | null;
-}
+export default async function SchoolPage({ params }: { params: { province: string; city: string; school: string } }) {
+  const cityData = await getCityData(params.province, params.city);
 
-export async function getStaticPaths() {
-  const provinceCityMap = await fetchDataFile<Record<string, { 
-    name: string; 
-    cities: Record<string, string> 
-  }>>('provinceCityMap.json');
-
-  if (!provinceCityMap) {
-    console.error('省份城市数据加载失败');
-    return { paths: [], fallback: false };
-  }
-
-  const paths = [];
-
-  for (const [provinceId, provinceInfo] of Object.entries(provinceCityMap)) {
-    for (const [cityId, _] of Object.entries(provinceInfo.cities || {})) {
-      const cityFilePath = `events/provinces/${provinceId}/${cityId}.json`;
-      const cityData = await fetchDataFile<{ schools: SchoolData[] }>(cityFilePath);
-
-      if (!cityData) {
-        console.warn(`[SKIP] 文件不存在: ${cityFilePath}`);
-        continue;
-      }
-
-      for (const school of cityData.schools) {
-        paths.push({
-          params: {
-            province: provinceId,
-            city: cityId,
-            school: school.id
-          }
-        });
-      }
-    }
-  }
-
-  return { paths, fallback: false };
-}
-
-export async function getStaticProps({ params }: { params: { province: string; city: string; school: string } }) {
-  const { province, city, school } = params;
-  const cityData = await getCityData(province, city);
-
-  if (!cityData) {
-    return {
-      props: {
-        params: {
-          province,
-          city,
-          school,
-        },
-        cityData: null,
-        schoolData: null,
-      },
-    };
-  }
-
-  const schoolData = cityData.schools.find(schoolItem => schoolItem.id === school);
-
-  if (!schoolData) {
-    return {
-      props: {
-        params: {
-          province,
-          city,
-          school,
-        },
-        cityData: null,
-        schoolData: null,
-      },
-    };
-  }
-
-  return {
-    props: {
-      params: {
-        province,
-        city,
-        school,
-      },
-      cityData,
-      schoolData,
-    },
-  };
-}
-
-const SchoolPage: React.FC<SchoolPageProps> = ({ params, cityData, schoolData }) => {
   if (!cityData) {
     return <div className="text-xl font-bold text-red-500">城市数据加载失败或不存在</div>;
   }
+
+  const schoolData = cityData.schools.find(school => school.id === params.school);
 
   if (!schoolData) {
     return <div className="text-xl font-bold text-red-500">学校数据加载失败或不存在</div>;
@@ -163,5 +72,3 @@ const SchoolPage: React.FC<SchoolPageProps> = ({ params, cityData, schoolData })
     </>
   );
 }
-
-export default SchoolPage;
