@@ -2,9 +2,69 @@
 import { getCityData } from '@/lib/fetchEvents';
 import EventCard from '@/components/EventCard';
 
-export default async function CityPage({ params }: { params: { province: string; city: string } }) {
-  const cityData = await getCityData(params.province, params.city);
+interface CityPageProps {
+  params: {
+    province: string;
+    city: string;
+  };
+  cityData: CityData | null;
+}
 
+export async function getStaticPaths() {
+  const provinceCityMap = await fetchDataFile<Record<string, { 
+    name: string; 
+    cities: Record<string, string> 
+  }>>('provinceCityMap.json');
+
+  if (!provinceCityMap) {
+    console.error('省份城市数据加载失败');
+    return { paths: [], fallback: false };
+  }
+
+  const paths = [];
+
+  for (const [provinceId, provinceInfo] of Object.entries(provinceCityMap)) {
+    for (const [cityId, _] of Object.entries(provinceInfo.cities || {})) {
+      paths.push({
+        params: {
+          province: provinceId,
+          city: cityId
+        }
+      });
+    }
+  }
+
+  return { paths, fallback: false };
+}
+
+export async function getStaticProps({ params }: { params: { province: string; city: string } }) {
+  const { province, city } = params;
+  const cityData = await getCityData(province, city);
+
+  if (!cityData) {
+    return {
+      props: {
+        params: {
+          province,
+          city,
+        },
+        cityData: null,
+      },
+    };
+  }
+
+  return {
+    props: {
+      params: {
+        province,
+        city,
+      },
+      cityData,
+    },
+  };
+}
+
+const CityPage: React.FC<CityPageProps> = ({ params, cityData }) => {
   if (!cityData) {
     return <div className="text-xl font-bold text-red-500">城市数据加载失败或不存在</div>;
   }
@@ -12,16 +72,15 @@ export default async function CityPage({ params }: { params: { province: string;
   return (
     <>
       <h1 className="text-4xl font-bold mb-8">{cityData.name}</h1>
-      {cityData.schools.map((school, schoolIndex) => (
-        <div key={school.id} className="mb-8">
-          {schoolIndex > 0 && <div className="border-t-2 border-gray-300 mt-4 mb-4"></div>} {/* 学校之间的稍短分割线 */}
-          <h3 className="text-4xl font-semibold mb-4">{school.name}</h3> {/* 将学校名称的字号提高到 text-4xl */}
-          <div className="ml-4"> {/* 学校内部内容往右移错开一点 */}
+      <div className="ml-4"> {/* 城市内部内容往右移错开一点 */}
+        {cityData.schools.map(school => (
+          <div key={school.id} className="mb-8">
+            <h2 className="text-3xl font-semibold mb-4">{school.name}</h2>
             {school.events.start?.length > 0 && (
               <>
                 <h4 className="text-xl font-semibold mb-2">开学事件</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {school.events.start?.map((event, eventIndex) => (
+                  {schoolData.events.start?.map((event, eventIndex) => (
                     <EventCard 
                       key={event.id}
                       event={{
@@ -30,7 +89,7 @@ export default async function CityPage({ params }: { params: { province: string;
                         question: event.question || "未命名学校事件",
                         choices: event.choices || {},
                         results: event.results || {},
-                        school: school.name || 'unknown_school',
+                        school: schoolData.name || 'unknown_school',
                         provinceId: params.province,
                         cityId: params.city,
                         schoolId: school.id,
@@ -67,8 +126,10 @@ export default async function CityPage({ params }: { params: { province: string;
               </>
             )}
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </>
   );
 }
+
+export default CityPage;
