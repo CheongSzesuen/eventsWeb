@@ -15,15 +15,21 @@ export default async function SchoolPage({ params }: { params: { province: strin
     return <div className="text-xl font-bold text-red-500">学校数据加载失败或不存在</div>;
   }
 
+  // 确保 events 不为 undefined
+  const events = schoolData.events || { start: [], special: [] };
+  const startEvents = events.start || [];
+  const specialEvents = events.special || [];
+
   return (
     <>
       <h1 className="text-4xl font-bold mb-8">{schoolData.name}</h1>
       <div className="ml-4"> {/* 学校内部内容往右移错开一点 */}
-        {schoolData.events.start?.length > 0 && (
+        {/* 开学事件 */}
+        {startEvents.length > 0 && (
           <>
             <h4 className="text-xl font-semibold mb-2">开学事件</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {schoolData.events.start?.map((event, eventIndex) => (
+              {startEvents.map((event) => (
                 <EventCard 
                   key={event.id}
                   event={{
@@ -43,12 +49,14 @@ export default async function SchoolPage({ params }: { params: { province: strin
             </div>
           </>
         )}
-        {schoolData.events.special?.length > 0 && (
+
+        {/* 特殊事件 */}
+        {specialEvents.length > 0 && (
           <>
-            {schoolData.events.start?.length > 0 && <div className="border-t border-gray-400 mt-4 mb-4"></div>} {/* 开学事件卡片和特殊事件字样之间 */}
+            {startEvents.length > 0 && <div className="border-t border-gray-400 mt-4 mb-4"></div>}
             <h4 className="text-xl font-semibold mb-2 mt-4">特殊事件</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {schoolData.events.special?.map((event, eventIndex) => (
+              {specialEvents.map((event) => (
                 <EventCard 
                   key={event.id}
                   event={{
