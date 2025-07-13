@@ -120,8 +120,8 @@ export default function EventSidebar({
                   </summary>
                   <ul className="ml-2 mt-1 space-y-1 pl-3 border-l border-gray-200">
                     {(city.schools || []).map((school: SchoolData) => {
-                      const startCount = school.start_count || 0;
-                      const specialCount = school.special_count || 0;
+                      const startCount = school.startCount || 0;
+          const specialCount = school.specialCount || 0;
                       if (startCount + specialCount === 0) {
                         return null;
                       }
