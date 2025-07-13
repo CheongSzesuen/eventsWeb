@@ -1,6 +1,6 @@
 import { getProvinceData } from '@/lib/fetchEvents';
 import EventCard from '@/components/EventCard';
-import { EventType } from '@/types/events'; // ✅ 引入枚举
+import { EventType } from '@/types/events'; 
 import { SchoolData, CityData, ProvinceData } from '@/types/events';
 
 export const runtime = 'edge';

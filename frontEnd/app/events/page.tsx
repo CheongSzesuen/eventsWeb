@@ -21,7 +21,7 @@ export default async function EventsPage() {
     })),
     ...(data.school_events || []).map(event => ({
       ...event,
-      type: event.type || 'school_start' as const, // 根据事件类型区分
+      type: event.type || type: EventType.SchoolStart, // 根据事件类型区分
       school: event.school || 'unknown_school', // 确保 school 字段存在
       question: event.question || "未命名学校事件",
     }))
