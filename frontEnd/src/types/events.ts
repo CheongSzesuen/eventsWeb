@@ -45,7 +45,7 @@ export interface SchoolData {
 export interface CityData {
   id: string;
   name: string;
-  schools: SchoolData[];
+  schools: ProcessedSchoolData[];
   total: number;
 }
 
@@ -79,4 +79,15 @@ export interface ApiResponse {
 export interface ResultProbability {
   text: string;
   prob: number;
+}
+// 新类型：包含统计字段的学校数据
+export interface ProcessedSchoolData {
+  id: string;
+  name: string;
+  events: {
+    start?: Event[];
+    special?: Event[];
+  };
+  start_count: number;
+  special_count: number;
 }

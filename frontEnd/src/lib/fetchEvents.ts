@@ -1,4 +1,4 @@
-import { ApiResponse, Event,ProvinceData, CityData, SchoolData } from '@/types/events';
+import { ApiResponse, Event,ProvinceData, CityData, SchoolData, ProcessedSchoolData } from '@/types/events';
 import { EventType } from '@/types/events';
 
 type FetchConfig = {
@@ -138,11 +138,11 @@ export const fetchEvents = async (
           return null;
         }
 
-        const schools = cityData.schools.map((school) => ({
+        const schools = cityData.schools.map((school): ProcessedSchoolData => ({
   ...school,
   events: school.events || { start: [], special: [] },
-  start_count: school.events?.start?.length || 0,
-  special_count: school.events?.special?.length || 0,
+  start_count: school.events.start?.length || 0,
+  special_count: school.events.special?.length || 0,
 }));
 
         const cityTotal = schools.reduce(
@@ -253,11 +253,11 @@ export const getProvinceData = async (
 
       if (!cityData) return null;
 
-      const schools = cityData.schools.map((school) => ({
+      const schools = cityData.schools.map((school): ProcessedSchoolData => ({
   ...school,
   events: school.events || { start: [], special: [] },
-  start_count: school.events?.start?.length || 0,
-  special_count: school.events?.special?.length || 0,
+  start_count: school.events.start?.length || 0,
+  special_count: school.events.special?.length || 0,
 }));
 
       const cityTotal = schools.reduce(
@@ -317,11 +317,11 @@ export const getCityData  = async (
     };
   }
 
-  const schools = cityData.schools.map((school) => ({
+  const schools = cityData.schools.map((school): ProcessedSchoolData => ({
   ...school,
   events: school.events || { start: [], special: [] },
-  start_count: school.events?.start?.length || 0,
-  special_count: school.events?.special?.length || 0,
+  start_count: school.events.start?.length || 0,
+  special_count: school.events.special?.length || 0,
 }));
 
   const cityTotal = schools.reduce(
