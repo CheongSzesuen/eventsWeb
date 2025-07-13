@@ -1,7 +1,6 @@
-// app/search/SearchEvents.tsx
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { searchEvents } from '@/lib/searchEvents'
 import type { Event } from '@/types/events'
@@ -41,7 +40,7 @@ function SearchResult({ event }: { event: Event }) {
   );
 }
 
-export default function SearchContent() {
+function SearchContentInner() {
   const searchParams = useSearchParams()
   const query = searchParams?.get('q')?.trim() || ''
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([])
@@ -142,5 +141,13 @@ export default function SearchContent() {
         </div>
       )}
     </>
+  )
+}
+
+export default function SearchContent() {
+  return (
+    <Suspense fallback={<div className="text-center py-12">加载中...</div>}>
+      <SearchContentInner />
+    </Suspense>
   )
 }
