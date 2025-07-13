@@ -33,9 +33,9 @@ function SearchResult({ event }: { event: Event }) {
           </div>
         ))}
       </div>
-      {event.end_game_choices?.includes('1') && (
-        <span className="inline-block mt-2 text-xs text-red-500">包含游戏结束选项</span>
-      )}
+      {event.endGameChoices?.includes('1') && (
+  <span className="inline-block mt-2 text-xs text-red-500">包含游戏结束选项</span>
+)}
     </Link>
   );
 }
