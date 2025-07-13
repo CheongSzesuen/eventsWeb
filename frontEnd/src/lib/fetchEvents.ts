@@ -164,8 +164,7 @@ export const fetchEvents = async (
     );
 
    const cities = (await Promise.all(cityPromises))
-  .filter((c): c is CityData => c !== null)
-  satisfies CityData[];
+  .filter((c): c is CityData => c !== null) as CityData[];
 
     if (cities.length > 0) {
       const provinceTotal = cities.reduce((acc, c) => acc + c.total, 0);
@@ -273,8 +272,7 @@ export const getProvinceData = async (
   );
 
  const cities = (await Promise.all(cityPromises))
-  .filter((c): c is CityData => c !== null)
-  satisfies CityData[];
+  .filter((c): c is CityData => c !== null) as CityData[];
 
   if (cities.length === 0) return null;
 
