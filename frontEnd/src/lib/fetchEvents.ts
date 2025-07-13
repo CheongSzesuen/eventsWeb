@@ -1,5 +1,5 @@
 import { ApiResponse, Event, RandomEvent, ProvinceData, CityData, SchoolData } from '@/types/events';
-
+import { EventType } from '@/types/events';
 type FetchConfig = {
   basePath?: string;
   cache?: RequestCache;
