@@ -68,7 +68,7 @@ export default async function SchoolPage({
                   key={event.id}
                   event={{
                     ...event,
-                    type: 'school_special' as const,
+                    type: EventType.SchoolSpecial,
                     question: event.question || "未命名学校事件",
                     choices: event.choices || {},
                     results: event.results || {},

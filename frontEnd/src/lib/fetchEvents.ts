@@ -207,7 +207,7 @@ export const fetchEvents = async (
         (school.events.special || []).forEach((event) => {
           schoolEvents.push({
             ...event,
-            type: 'school_special' as const,
+            type: EventType.SchoolSpecial,
             school: school.name,
             provinceId: province.id,
             cityId: city.id,
