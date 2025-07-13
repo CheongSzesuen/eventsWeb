@@ -1,16 +1,23 @@
 import { getProvinceData } from '@/lib/fetchEvents';
 import EventCard from '@/components/EventCard';
 
-export default async function ProvincePage({ params }: { params: { province: string } }) {
-  const provinceData = await getProvinceData(params.province);
+export default async function ProvincePage({
+  params,
+}: {
+  params: Promise<{ province: string }>;
+}) {
+  const { province } = await params;
+
+  const provinceData = await getProvinceData(province);
+
   if (!provinceData) {
     return <div className="text-xl font-bold text-red-500">省份数据加载失败或不存在</div>;
   }
+
   return (
     <>
       <h1 className="text-4xl font-bold mb-8">{provinceData.name}</h1>
       {provinceData.cities.map((city, cityIndex) => {
-        // 确保 schools 字段存在
         const schools = city.schools || [];
         return (
           <div key={city.id} className="mb-16">
@@ -18,7 +25,6 @@ export default async function ProvincePage({ params }: { params: { province: str
             <h2 className="text-3xl font-bold mb-4">{city.name}</h2>
             <div className="ml-4">
               {schools.map((school, schoolIndex) => {
-                // 确保 events 字段存在
                 const schoolEvents = school.events || { start: [], special: [] };
                 const startEvents = schoolEvents.start || [];
                 const specialEvents = schoolEvents.special || [];
