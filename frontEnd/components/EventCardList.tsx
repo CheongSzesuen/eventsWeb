@@ -19,7 +19,7 @@ interface EventCardListProps {
 export default function EventCardList({ events, school, provinceId, cityId }: EventCardListProps) {
   return (
     <>
-      {events.start?.length > 0 && (
+      {events.start && events.start.length > 0 && (
         <>
           <h4 className="text-xl font-semibold mb-2">开学事件</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -43,9 +43,9 @@ export default function EventCardList({ events, school, provinceId, cityId }: Ev
           </div>
         </>
       )}
-      {events.special?.length > 0 && (
+      {events.special && events.special.length > 0 && (
         <>
-          {events.start?.length > 0 && <div className="border-t border-gray-400 mt-4 mb-4"></div>} {/* 开学事件卡片和特殊事件字样之间 */}
+          {events.start && events.start.length > 0 && <div className="border-t border-gray-400 mt-4 mb-4"></div>}
           <h4 className="text-xl font-semibold mb-2 mt-4">特殊事件</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {events.special.map((event, eventIndex) => (
