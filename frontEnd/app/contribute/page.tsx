@@ -1,6 +1,5 @@
 // frontEnd/app/contribute/page.tsx
 'use client';
-
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 
@@ -27,7 +26,6 @@ function ContributeContent() {
   const type = searchParams?.get('type') || '';
   const city = searchParams?.get('city') || '';
   const school = searchParams?.get('school') || '';
-
   const [options, setOptions] = useState<Option[]>([
     {
       id: 1,
@@ -54,7 +52,6 @@ function ContributeContent() {
       ],
     },
   ]);
-
   const [contributors, setContributors] = useState(['']);
   const [newContributor, setNewContributor] = useState('');
 
@@ -83,7 +80,7 @@ function ContributeContent() {
 
   const handleOptionChange = (id: number, field: keyof Option, value: string | boolean) => {
     setOptions(
-      options.map((option: Option) => 
+      options.map((option: Option) =>
         option.id === id ? { ...option, [field]: value } : option
       )
     );
@@ -111,7 +108,6 @@ function ContributeContent() {
   const removeRandomResult = (optionId: number, randomId: string) => {
     const option = options.find((opt) => opt.id === optionId);
     if (!option || option.randomResults.length <= 2) return;
-    
     const newRandomResults = option.randomResults.filter((result) => result.id !== randomId);
     setOptions(
       options.map((opt) =>
@@ -121,9 +117,9 @@ function ContributeContent() {
   };
 
   const handleRandomResultChange = (
-    optionId: number, 
-    randomId: string, 
-    field: keyof RandomResult, 
+    optionId: number,
+    randomId: string,
+    field: keyof RandomResult,
     value: string | number | boolean
   ) => {
     setOptions(
@@ -196,7 +192,6 @@ function ContributeContent() {
         {type === 'exam' && '贡献考试事件'}
         {type === 'school' && `为 ${school || ''} (${city || ''}) 贡献学校事件`}
       </h1>
-      
       <div className="bg-gray-100 p-4 rounded">
         <div className="space-y-6">
           {/* 问题描述 */}
@@ -210,7 +205,6 @@ function ContributeContent() {
               placeholder="请输入问题描述..."
             />
           </div>
-
           {/* 选项 */}
           <div className="bg-green-50 p-3 rounded-lg border border-green-200">
             <label className="block text-base font-medium text-gray-700 mb-1">选项:</label>
@@ -237,7 +231,6 @@ function ContributeContent() {
                       </button>
                     )}
                   </div>
-
                   <div className="mt-2 space-y-2">
                     {/* 普通结果 */}
                     {!option.isRandom && (
@@ -275,7 +268,6 @@ function ContributeContent() {
                         </div>
                       </div>
                     )}
-
                     {/* 随机结果 */}
                     {option.isRandom && (
                       <div className="space-y-2">
@@ -357,7 +349,6 @@ function ContributeContent() {
                         )}
                       </div>
                     )}
-
                     <div className="flex items-center">
                       <label className="relative flex items-center cursor-pointer gap-2">
                         <input
@@ -387,7 +378,6 @@ function ContributeContent() {
               添加选项
             </button>
           </div>
-
           {/* 贡献者 */}
           <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
             <label className="block text-base font-medium text-gray-700 mb-1">贡献者:</label>
@@ -421,7 +411,6 @@ function ContributeContent() {
               </button>
             </div>
           </div>
-
           {/* 提交按钮 */}
           <div className="flex justify-end">
             <button

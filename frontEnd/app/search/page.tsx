@@ -1,4 +1,4 @@
-// app/search/SearchContent.tsx
+// app/search/SearchEvents.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -43,7 +43,7 @@ function SearchResult({ event }: { event: Event }) {
 
 export default function SearchContent() {
   const searchParams = useSearchParams()
-  const query = searchParams.get('q')?.trim() || ''
+  const query = searchParams?.get('q')?.trim() || ''
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [eventsPerPage] = useState(10)
