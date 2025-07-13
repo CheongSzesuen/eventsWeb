@@ -2,18 +2,13 @@ import { ApiResponse, Event, RandomEvent, ProvinceData, CityData, SchoolData } f
 
 // 环境感知的基路径配置
 const getBasePath = () => {
-  // 客户端环境
-  if (typeof window !== 'undefined') return '/data';
-  // 服务器端环境
-  const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
-  const host = process.env.VERCEL_URL || 'localhost:3000';
-  return `${protocol}://${host}/data`;
+  return '/data'; // 所有环境下都使用相对路径
 };
 
-type FetchConfig = {
-  basePath?: string;
-  cache?: RequestCache;
-  retries?: number;
+const DEFAULT_CONFIG: FetchConfig = {
+  basePath: getBasePath(),
+  cache: 'force-cache',
+  retries: 3
 };
 
 const DEFAULT_CONFIG: FetchConfig = {
