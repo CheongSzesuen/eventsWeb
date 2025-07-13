@@ -31,7 +31,7 @@ export default async function HomePage() {
           ...(school.events.start || []).map(event => ({
             ...event,
             school: school.name,
-            type: 'school_start' as const
+            type: EventType.SchoolStart
           })),
           ...(school.events.special || []).map(event => ({
             ...event,

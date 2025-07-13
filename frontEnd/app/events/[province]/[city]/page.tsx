@@ -1,5 +1,5 @@
 export const runtime = 'edge';
-import { getcityData } from '@/lib/fetchEvents';
+import { getCityData  } from '@/lib/fetchEvents';
 import EventCard from '@/components/EventCard';
 
 export default async function CityPage({
@@ -9,7 +9,7 @@ export default async function CityPage({
 }) {
   const { province, city } = await params;
 
-  const cityData = await getcityData(province, city);
+  const cityData = await getCityData (province, city);
 
   if (!cityData) {
     return <div className="text-xl font-bold text-red-500">城市数据加载失败或不存在</div>;

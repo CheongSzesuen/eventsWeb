@@ -1,6 +1,6 @@
 // frontEnd/app/events/[province]/[city]/[school]/page.tsx
 export const runtime = 'edge';
-import { getCityData } from '@/lib/fetchEvents'; // ✅ 正确函数名
+import { getCityData  } from '@/lib/fetchEvents'; // ✅ 正确函数名
 import EventCard from '@/components/EventCard';
 
 export default async function SchoolPage({
@@ -10,7 +10,7 @@ export default async function SchoolPage({
 }) {
   const { province, city, school } = await params;
 
-  const cityData = await getCityData(province, city); // ✅ 改为驼峰命名
+  const cityData = await getCityData (province, city); // ✅ 改为驼峰命名
 
   if (!cityData) {
     return <div className="text-xl font-bold text-red-500">城市数据加载失败或不存在</div>;
@@ -40,7 +40,7 @@ export default async function SchoolPage({
                   key={event.id}
                   event={{
                     ...event,
-                    type: 'school_start' as const,
+                    type: EventType.SchoolStart,
                     question: event.question || "未命名学校事件",
                     choices: event.choices || {},
                     results: event.results || {},

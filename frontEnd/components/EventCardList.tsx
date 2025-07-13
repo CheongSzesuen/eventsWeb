@@ -28,7 +28,7 @@ export default function EventCardList({ events, school, provinceId, cityId }: Ev
                 key={event.id}
                 event={{
                   ...event,
-                  type: 'school_start' as const,
+                  type: EventType.SchoolStart,
                   question: event.question || "未命名学校事件",
                   choices: event.choices || {},
                   results: event.results || {},

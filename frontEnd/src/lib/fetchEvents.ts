@@ -196,7 +196,7 @@ export const fetchEvents = async (
         (school.events.start || []).forEach((event) => {
           schoolEvents.push({
             ...event,
-            type: 'school_start' as const,
+            type: EventType.SchoolStart,
             school: school.name,
             provinceId: province.id,
             cityId: city.id,
@@ -290,7 +290,7 @@ export const getProvinceData = async (
 /**
  * 获取城市数据
  */
-export const getCityData = async (
+export const getCityData  = async (
   provinceId: string,
   cityId: string
 ): Promise<CityData | null> => {
@@ -345,6 +345,6 @@ export const getSchoolsByCity = async (
   provinceId: string,
   cityId: string
 ): Promise<SchoolData[]> => {
-  const cityData = await getCityData(provinceId, cityId);
+  const cityData = await getCityData (provinceId, cityId);
   return cityData?.schools || [];
 };
