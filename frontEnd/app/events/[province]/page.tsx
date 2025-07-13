@@ -1,21 +1,17 @@
-// frontEnd/app/events/[province]/page.tsx
 import { getProvinceData } from '@/lib/fetchEvents';
 import EventCard from '@/components/EventCard';
 
 export default async function ProvincePage({ params }: { params: { province: string } }) {
   const provinceData = await getProvinceData(params.province);
-
   if (!provinceData) {
     return <div className="text-xl font-bold text-red-500">省份数据加载失败或不存在</div>;
   }
-
   return (
     <>
       <h1 className="text-4xl font-bold mb-8">{provinceData.name}</h1>
       {provinceData.cities.map((city, cityIndex) => {
         // 确保 schools 字段存在
         const schools = city.schools || [];
-
         return (
           <div key={city.id} className="mb-16">
             {cityIndex > 0 && <div className="border-t-4 border-gray-200 mt-8 mb-8"></div>}
@@ -26,7 +22,6 @@ export default async function ProvincePage({ params }: { params: { province: str
                 const schoolEvents = school.events || { start: [], special: [] };
                 const startEvents = schoolEvents.start || [];
                 const specialEvents = schoolEvents.special || [];
-
                 return (
                   <div key={school.id} className="mb-8">
                     {schoolIndex > 0 && <div className="border-t-2 border-gray-300 mt-4 mb-4"></div>}
@@ -57,7 +52,6 @@ export default async function ProvincePage({ params }: { params: { province: str
                           </div>
                         </>
                       )}
-
                       {/* 特殊事件 */}
                       {specialEvents.length > 0 && (
                         <>
