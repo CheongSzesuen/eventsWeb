@@ -1,4 +1,4 @@
-// frontEnd/app/search/page.tsx
+// app/search/SearchContent.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -41,9 +41,9 @@ function SearchResult({ event }: { event: Event }) {
   );
 }
 
-export default function SearchPage() {
+export default function SearchContent() {
   const searchParams = useSearchParams();
-  const query = searchParams?.get('q')?.trim() || ''; // 使用可选链防止 null 报错
+  const query = searchParams?.get('q')?.trim() || '';
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [eventsPerPage] = useState(10);
@@ -71,11 +71,7 @@ export default function SearchPage() {
   const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 dark:text-white">
-        {query ? `"${query}"的搜索结果` : '所有事件'}
-      </h1>
-      
+    <>
       {filteredEvents.length > 0 ? (
         <div className="mb-4">
           <select 
@@ -113,7 +109,7 @@ export default function SearchPage() {
       ) : null}
 
       {currentEvents.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {currentEvents.map(event => (
             <SearchResult key={event.id} event={event} />
           ))}
@@ -148,12 +144,6 @@ export default function SearchPage() {
           ))}
         </div>
       )}
-    </div>
+    </>
   );
-}
-
-interface EventResult {
-  text: string;
-  prob?: number;
-  end_game?: boolean;
 }
