@@ -1,15 +1,26 @@
 // frontEnd/utils/mapService.ts
-import provinceCityMap from '@/data/provinceCityMap.json';
-import schoolMap from '@/data/schoolMap.json';
+import provinceCityMap from '@/public/data/provinceCityMap.json';
+import schoolMap from '@/public/data/schoolMap.json';
+
+// 定义类型
+interface ProvinceInfo {
+  name: string;
+  cities: Record<string, string>;
+}
+
+type ProvinceCityMap = Record<string, ProvinceInfo>;
+
+// 强制类型转换
+const typedProvinceCityMap = provinceCityMap as ProvinceCityMap;
 
 export function getProvinceName(provinceId: string): string {
-  return provinceCityMap[provinceId]?.name || '未知省份';
+  return typedProvinceCityMap[provinceId]?.name || '未知省份';
 }
 
 export function getCityName(provinceId: string, cityId: string): string {
-  return provinceCityMap[provinceId]?.cities?.[cityId] || '未知城市';
+  return typedProvinceCityMap[provinceId]?.cities?.[cityId] || '未知城市';
 }
 
 export function getSchoolName(schoolId: string): string {
-  return schoolMap[schoolId] || '未知学校';
+  return (schoolMap as Record<string, string>)[schoolId] || '未知学校';
 }
