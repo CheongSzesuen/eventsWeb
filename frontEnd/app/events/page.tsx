@@ -6,26 +6,26 @@ export default async function EventsPage() {
   const data = await fetchEvents();
   
   // 合并时确保 school 字段存在
-  const events = [
-    ...(data.random_events || []).map(event => ({
-      ...event,
-      type: 'random' as const,
-      school: '', // 初始化 school 字段
-      question: event.question || "未命名随机事件",
-    })),
-    ...(data.exam_events || []).map(event => ({
-      ...event,
-      type: 'exam' as const,
-      school: '', // 初始化 school 字段
-      question: event.question || "未命名考试事件",
-    })),
-    ...(data.school_events || []).map(event => ({
-      ...event,
-      type: event.type || type: EventType.SchoolStart, // 根据事件类型区分
-      school: event.school || 'unknown_school', // 确保 school 字段存在
-      question: event.question || "未命名学校事件",
-    }))
-  ];
+  const allEvents = [
+  ...(data?.random_events || []).map((event) => ({
+    ...event,
+    school: '', // 默认学校字段
+    type: EventType.Random, // 固定类型为 Random
+  })),
+  ...(data?.exam_events || []).map((event) => ({
+    ...event,
+    school: '', // 考试事件没有学校信息
+    type: EventType.Exam, // 固定类型为 Exam
+  })),
+  ...(data?.school_events || []).map((event) => ({
+    ...event,
+    type: event.type || EventType.SchoolStart, // 使用事件自带类型或默认 SchoolStart
+    school: event.school || 'unknown_school',
+    provinceId: event.provinceId || 'unknown_province',
+    cityId: event.cityId || 'unknown_city',
+    schoolId: event.schoolId || 'unknown_school',
+  })),
+];
 
   // 调试信息
   console.log('Fetched Events:', data);
