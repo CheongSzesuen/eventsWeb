@@ -180,12 +180,12 @@ export const fetchEvents = async (
 
   const examEvents = (examData.exam_events || []).map((event) => ({
     ...event,
-    type: 'exam' as const,
+    type: EventType.Exam,
   }));
 
   const randomEvents = (randomData.random_events || []).map((event) => ({
     ...event,
-    type: 'random' as const,
+    type: EventType.Random,
   }));
 
   const schoolEvents: Event[] = [];
