@@ -2,6 +2,7 @@
 export const runtime = 'edge';
 import { getCityData  } from '@/lib/fetchEvents'; // ✅ 正确函数名
 import EventCard from '@/components/EventCard';
+import { EventType } from '@/types/events';
 
 export default async function SchoolPage({
   params,

@@ -2,7 +2,7 @@
 export const runtime = 'edge';
 import { getSchoolsByCity } from '@/lib/fetchEvents';
 import EventCard from '@/components/EventCard';
-
+import { EventType } from '@/types/events';
 export default async function SchoolStartPage({
   params,
 }: {

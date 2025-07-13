@@ -2,7 +2,7 @@
 'use client';
 
 import EventCard from '@/components/EventCard';
-
+import { EventType } from '@/types/events';
 interface EventCardListProps {
   events: {
     start?: any[];
