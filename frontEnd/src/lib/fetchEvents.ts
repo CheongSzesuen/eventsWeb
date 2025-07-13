@@ -139,11 +139,11 @@ export const fetchEvents = async (
         }
 
         const schools = cityData.schools.map((school) => ({
-          ...school,
-          events: school.events || { start: [], special: [] },
-          start_count: school.events.start?.length || 0,
-          special_count: school.events.special?.length || 0,
-        }));
+  ...school,
+  events: school.events || { start: [], special: [] },
+  start_count: school.events?.start?.length || 0,
+  special_count: school.events?.special?.length || 0,
+}));
 
         const cityTotal = schools.reduce(
           (acc, s) => acc + s.start_count + s.special_count,
@@ -254,11 +254,11 @@ export const getProvinceData = async (
       if (!cityData) return null;
 
       const schools = cityData.schools.map((school) => ({
-        ...school,
-        events: school.events || { start: [], special: [] },
-        start_count: school.events.start?.length || 0,
-        special_count: school.events.special?.length || 0,
-      }));
+  ...school,
+  events: school.events || { start: [], special: [] },
+  start_count: school.events?.start?.length || 0,
+  special_count: school.events?.special?.length || 0,
+}));
 
       const cityTotal = schools.reduce(
         (acc, s) => acc + s.start_count + s.special_count,
@@ -318,11 +318,11 @@ export const getCityData  = async (
   }
 
   const schools = cityData.schools.map((school) => ({
-    ...school,
-    events: school.events || { start: [], special: [] },
-    start_count: school.events.start?.length || 0,
-    special_count: school.events.special?.length || 0,
-  }));
+  ...school,
+  events: school.events || { start: [], special: [] },
+  start_count: school.events?.start?.length || 0,
+  special_count: school.events?.special?.length || 0,
+}));
 
   const cityTotal = schools.reduce(
     (acc, s) => acc + s.start_count + s.special_count,
