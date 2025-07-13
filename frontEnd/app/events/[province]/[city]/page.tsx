@@ -1,7 +1,7 @@
 export const runtime = 'edge';
 import { getCityData  } from '@/lib/fetchEvents';
 import EventCard from '@/components/EventCard';
-
+import { EventType } from '@/types/events';
 export default async function CityPage({
   params,
 }: {
@@ -37,7 +37,7 @@ export default async function CityPage({
                         key={event.id}
                         event={{
                           ...event,
-                          type: 'school_start',
+                          type: EventType.SchoolStart,
                           question: event.question || "未命名学校事件",
                           choices: event.choices || {},
                           results: event.results || {},
