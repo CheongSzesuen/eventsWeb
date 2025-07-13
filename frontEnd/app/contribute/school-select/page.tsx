@@ -17,7 +17,7 @@ type Province =
   | '香港' | '澳门' | '台湾';
 
 // 2. 定义省-市数据结构
-interface ProvinceCityData {
+interface ProvincecityData {
   [key: string]: string[];
   北京: string[];
   上海: string[];
@@ -56,7 +56,7 @@ interface ProvinceCityData {
 }
 
 // 3. 省-市数据（完整保留）
-const PROVINCE_CITY_DATA: ProvinceCityData = {
+const PROVINCE_CITY_DATA: ProvincecityData = {
   '北京': ['北京'],
   '上海': ['上海'],
   '天津': ['天津'],
@@ -91,7 +91,7 @@ const PROVINCE_CITY_DATA: ProvinceCityData = {
   '香港': ['香港'],
   '澳门': ['澳门'],
   '台湾': ['台北', '高雄', '基隆', '台中', '台南', '新竹', '嘉义', '桃园', '新北', '宜兰', '苗栗', '彰化', '南投', '云林', '屏东', '台东', '花莲', '澎湖'],
-} as ProvinceCityData; // 添加类型断言
+} as ProvincecityData; // 添加类型断言
 
 export default function SchoolSelect() {
   const [confirmed, setConfirmed] = useState(false);

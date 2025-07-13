@@ -1,34 +1,34 @@
-// frontEnd/src/types/events.ts
+/**
+ * 通用事件类型
+ */
 export interface Event {
   id: string;
   question: string;
-  choices: { [key: string]: string };
-  results: { [key: string]: string | ResultProbability[] };
-  end_game_choices?: string[];
-  achievements?: { [key: string]: any };
+  choices: Record<string, string>;
+  results: Record<string, string | ResultProbability[]>;
+  endGameChoices?: string[];
+  achievements?: Record<string, any>;
   contributors?: string[];
-  type: 'exam' | 'random' | 'school_start' | 'school_special';
+  type: EventType;
   school?: string;
   provinceId?: string;
   cityId?: string;
   schoolId?: string;
 }
 
-export interface RandomEvent {
-  id: string;
-  question: string;
-  choices: { [key: string]: string };
-  results: { [key: string]: string | ResultProbability[] };
-  end_game_choices?: string[];
-  achievements?: { [key: string]: any };
-  contributors?: string[];
-  type: 'random';
-  school?: string;
-  provinceId?: string;
-  cityId?: string;
-  schoolId?: string;
+/**
+ * 事件类型枚举
+ */
+export enum EventType {
+  Exam = 'exam',
+  Random = 'random',
+  SchoolStart = 'school_start',
+  SchoolSpecial = 'school_special'
 }
 
+/**
+ * 学校数据结构
+ */
 export interface SchoolData {
   id: string;
   name: string;
@@ -36,10 +36,13 @@ export interface SchoolData {
     start?: Event[];
     special?: Event[];
   };
-  start_count: number;
-  special_count: number;
+  start_count?: number;
+  special_count?: number;
 }
 
+/**
+ * 城市数据结构
+ */
 export interface CityData {
   id: string;
   name: string;
@@ -47,6 +50,9 @@ export interface CityData {
   total: number;
 }
 
+/**
+ * 省份数据结构
+ */
 export interface ProvinceData {
   id: string;
   name: string;
@@ -54,17 +60,23 @@ export interface ProvinceData {
   total: number;
 }
 
+/**
+ * API 响应格式
+ */
 export interface ApiResponse {
   provinces: {
     total: number;
     provinces: ProvinceData[];
   };
   exam_events: Event[];
-  random_events: RandomEvent[];
+  random_events: Event[];
   school_events: Event[];
   total: number;
 }
 
+/**
+ * 概率结果类型
+ */
 export interface ResultProbability {
   text: string;
   prob: number;

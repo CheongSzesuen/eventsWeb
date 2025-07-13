@@ -1,6 +1,6 @@
-// app/page.tsx
 import { fetchEvents } from '@/lib/fetchEvents';
 import EventCard from '@/components/EventCard';
+import type { ProvinceData, CityData, SchoolData } from '@/types/events';
 
 export default async function HomePage() {
   let data;
@@ -16,80 +16,48 @@ export default async function HomePage() {
     return (
       <div className="max-w-4xl mx-auto p-6 bg-red-50 rounded-lg">
         <h1 className="text-2xl font-bold text-red-600 mb-4">数据加载失败</h1>
-        <div className="space-y-2">
-          <p className="text-red-700">错误信息: {(error as Error).message}</p>
-          <p className="text-red-700">建议操作:</p>
-          <ul className="list-disc pl-6 text-red-700">
-            <li>检查控制台查看详细错误</li>
-            <li>验证数据文件是否存在</li>
-            <li>刷新页面重试</li>
-          </ul>
-        </div>
+        <p className="text-red-700">错误信息: {(error as Error).message}</p>
       </div>
     );
   }
 
-  // 提取事件逻辑保持不变
-  const provinceEvents = (data?.provinces?.provinces || []).flatMap(province => 
-    (province?.cities || []).flatMap(city => 
-      (city?.schools || []).flatMap(school => 
-        [
-          ...(school?.events?.start?.map(event => ({
-            ...event,
-            school: school.name,
-            type: 'school_start' as const
-          })) || []),
-          ...(school?.events?.special?.map(event => ({
-            ...event,
-            school: school.name,
-            type: 'school_special' as const
-          })) || [])
-        ]
-      ) || []
-    ) || []
-  );
-
+  // 合并所有事件
   const allEvents = [
     ...(data?.random_events || []),
     ...(data?.exam_events || []),
-    ...provinceEvents
+    ...data.provinces.provinces.flatMap((province: ProvinceData) =>
+      province.cities.flatMap((city: CityData) =>
+        city.schools.flatMap((school: SchoolData) => [
+          ...(school.events.start || []).map(event => ({
+            ...event,
+            school: school.name,
+            type: 'school_start' as const
+          })),
+          ...(school.events.special || []).map(event => ({
+            ...event,
+            school: school.name,
+            type: 'school_special' as const
+          }))
+        ])
+      )
+    )
   ];
 
   if (allEvents.length === 0) {
     return (
       <div className="max-w-4xl mx-auto p-6 bg-yellow-50 rounded-lg">
         <h1 className="text-2xl font-bold text-yellow-600 mb-4">暂无事件</h1>
-        <div className="space-y-2">
-          <p className="text-yellow-700">可能原因:</p>
-          <ul className="list-disc pl-6 text-yellow-700">
-            <li>数据文件尚未配置</li>
-            <li>文件路径配置错误</li>
-            <li>数据正在更新中</li>
-          </ul>
-        </div>
+        <p className="text-yellow-700">当前没有可显示的事件数据。</p>
       </div>
     );
   }
 
   return (
     <>
-      <h1 className="text-3xl font-bold mb-8">首页事件</h1>
+      <h1 className="text-3xl font-bold mb-8">事件总览</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {allEvents.map((event) => (
-          <div key={event.id} className="hover:shadow-lg transition-shadow duration-200">
-            <EventCard
-              event={{
-                ...event,
-                question: event.question || "未命名事件",
-                choices: event.choices || {
-                  default: "默认选项"
-                },
-                results: event.results || {
-                  default: "默认结果"
-                }
-              }}
-            />
-          </div>
+          <EventCard key={event.id} event={event} showBadge />
         ))}
       </div>
     </>

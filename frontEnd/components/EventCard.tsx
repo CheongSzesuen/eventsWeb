@@ -2,7 +2,12 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import type { Event } from '@/types/events';
+import type { Event, SchoolData, CityData, ProvinceData } from '@/types/events';
+
+// 定义带学校信息的事件类型
+export interface EventWithSchool extends Event {
+  school?: string;
+}
 
 export default function EventCard({ 
   event,
@@ -29,8 +34,7 @@ export default function EventCard({
 
   return (
     <div 
-      className="h-full bg-white dark:bg-gray-800 rounded-lg shadow p-4 hover:shadow-lg transition-all
-                 select-none"
+      className="h-full bg-white dark:bg-gray-800 rounded-lg shadow p-4 hover:shadow-lg transition-all select-none"
     >
       {showBadge && (
         <div className="flex gap-2 mb-2 flex-wrap">

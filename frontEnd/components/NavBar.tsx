@@ -102,7 +102,6 @@ export default function NavBar({
             )}
           </button>
         </div>
-        {/* 搜索框 
         <form onSubmit={handleSearch} className="flex-1 max-w-xl mx-4">
           <div className="relative">
             <input
@@ -121,7 +120,6 @@ export default function NavBar({
             </button>
           </div>
         </form>
-        */}
         <div 
           className="relative"
           ref={dropdownRef}
