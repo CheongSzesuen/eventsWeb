@@ -1,11 +1,11 @@
 // app/search/SearchContent.tsx
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { searchEvents } from '@/lib/searchEvents';
-import type { Event } from '@/types/events';
-import Link from 'next/link';
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { searchEvents } from '@/lib/searchEvents'
+import type { Event } from '@/types/events'
+import Link from 'next/link'
 
 function SearchResult({ event }: { event: Event }) {
   return (
@@ -42,33 +42,30 @@ function SearchResult({ event }: { event: Event }) {
 }
 
 export default function SearchContent() {
-  const searchParams = useSearchParams();
-  const query = searchParams?.get('q')?.trim() || '';
-  const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [eventsPerPage] = useState(10);
+  const searchParams = useSearchParams()
+  const query = searchParams.get('q')?.trim() || ''
+  const [filteredEvents, setFilteredEvents] = useState<Event[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [eventsPerPage] = useState(10)
 
   useEffect(() => {
     const searchAndFilter = async () => {
-      const results = await searchEvents(query);
-      setFilteredEvents(results);
-      setCurrentPage(1); // 每次搜索后重置到第一页
-    };
+      const results = await searchEvents(query)
+      setFilteredEvents(results)
+      setCurrentPage(1)
+    }
 
     if (query) {
-      searchAndFilter();
+      searchAndFilter()
     } else {
-      setFilteredEvents([]);
+      setFilteredEvents([])
     }
-  }, [query]);
+  }, [query])
 
-  // 获取当前页面的事件
-  const indexOfLastEvent = currentPage * eventsPerPage;
-  const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
-  const currentEvents = filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent);
-
-  // 分页按钮
-  const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
+  const indexOfLastEvent = currentPage * eventsPerPage
+  const indexOfFirstEvent = indexOfLastEvent - eventsPerPage
+  const currentEvents = filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent)
+  const totalPages = Math.ceil(filteredEvents.length / eventsPerPage)
 
   return (
     <>
@@ -77,26 +74,26 @@ export default function SearchContent() {
           <select 
             className="border p-2 rounded-lg"
             onChange={(e) => {
-              const sortType = e.target.value;
-              let sortedEvents = [...filteredEvents];
+              const sortType = e.target.value
+              let sortedEvents = [...filteredEvents]
               switch(sortType) {
                 case 'type':
-                  sortedEvents.sort((a, b) => (a.type || '').localeCompare(b.type || ''));
-                  break;
+                  sortedEvents.sort((a, b) => (a.type || '').localeCompare(b.type || ''))
+                  break
                 case 'school':
-                  sortedEvents.sort((a, b) => (a.school || '').localeCompare(b.school || ''));
-                  break;
+                  sortedEvents.sort((a, b) => (a.school || '').localeCompare(b.school || ''))
+                  break
                 case 'province':
-                  sortedEvents.sort((a, b) => (a.provinceId || '').localeCompare(b.provinceId || ''));
-                  break;
+                  sortedEvents.sort((a, b) => (a.provinceId || '').localeCompare(b.provinceId || ''))
+                  break
                 case 'city':
-                  sortedEvents.sort((a, b) => (a.cityId || '').localeCompare(b.cityId || ''));
-                  break;
+                  sortedEvents.sort((a, b) => (a.cityId || '').localeCompare(b.cityId || ''))
+                  break
                 default:
-                  break;
+                  break
               }
-              setFilteredEvents(sortedEvents);
-              setCurrentPage(1); // 每次排序后重置到第一页
+              setFilteredEvents(sortedEvents)
+              setCurrentPage(1)
             }}
           >
             <option value="default">默认排序</option>
@@ -145,5 +142,5 @@ export default function SearchContent() {
         </div>
       )}
     </>
-  );
+  )
 }

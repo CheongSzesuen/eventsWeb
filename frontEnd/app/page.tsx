@@ -1,4 +1,4 @@
-// frontEnd/app/page.tsx
+// app/page.tsx
 import { fetchEvents } from '@/lib/fetchEvents';
 import EventCard from '@/components/EventCard';
 
@@ -29,7 +29,7 @@ export default async function HomePage() {
     );
   }
 
-  // 从省份数据结构中提取事件
+  // 提取事件逻辑保持不变
   const provinceEvents = (data?.provinces?.provinces || []).flatMap(province => 
     (province?.cities || []).flatMap(city => 
       (city?.schools || []).flatMap(school => 
@@ -49,7 +49,6 @@ export default async function HomePage() {
     ) || []
   );
 
-  // 合并所有事件来源
   const allEvents = [
     ...(data?.random_events || []),
     ...(data?.exam_events || []),
