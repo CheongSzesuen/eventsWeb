@@ -26,7 +26,7 @@ function SearchResult({ event }: { event: Event }) {
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   {typeof event.results[key] === 'string' 
                     ? (event.results[key] as string).slice(0, 50) + '...'
-                    : (event.results[key] as any[])[0]?.text?.slice(0, 50) + '...' ?? ''
+                    : ((event.results[key] as any[])[0]?.text ? (event.results[key] as any[])[0].text.slice(0, 50) + '...' : '')
                   }
                 </p>
               )}
