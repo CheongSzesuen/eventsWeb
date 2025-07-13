@@ -24,7 +24,7 @@ const notFoundCache = new Set<string>();
 
 /**
  * Universal data loading function using the fetch API.
- * This now works in both browser and edge environments without Node.js-specific code.
+ * CORRECTED: Now constructs an absolute URL to work in the build environment.
  */
 export async function fetchDataFile<T>(
   filePath: string,
@@ -39,12 +39,24 @@ export async function fetchDataFile<T>(
     return null;
   }
 
-  const url = `${effectiveBasePath}/${filePath}`;
+  // --- START OF CHANGES ---
+
+  // 1. Define the application's base URL.
+  //    It uses the environment variable in production/builds and defaults to localhost for local development.
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
+  // 2. Create a full, absolute URL for fetch.
+  //    This combines the appUrl with the relative path to the file.
+  const absoluteUrl = new URL(`${effectiveBasePath}/${filePath}`, appUrl).toString();
+
+  // --- END OF CHANGES ---
+
 
   while (attempt < maxAttempts) {
     try {
-      console.log(`[FETCH] Requesting: ${url} (Attempt ${attempt + 1})`);
-      const response = await fetch(url, {
+      // 3. Use the new absoluteUrl in the fetch call and logs.
+      console.log(`[FETCH] Requesting: ${absoluteUrl} (Attempt ${attempt + 1})`);
+      const response = await fetch(absoluteUrl, { // <-- Use absoluteUrl here
         cache: config.cache,
         headers: {
           'Content-Type': 'application/json',
@@ -54,7 +66,7 @@ export async function fetchDataFile<T>(
 
       if (response.status === 404) {
         notFoundCache.add(filePath);
-        console.warn(`[NOT FOUND] File does not exist: ${filePath}`);
+        console.warn(`[NOT FOUND] File does not exist: ${absoluteUrl}`);
         return null;
       }
 
@@ -63,14 +75,14 @@ export async function fetchDataFile<T>(
       }
 
       const data = await response.json();
-      console.log(`[SUCCESS] Successfully loaded: ${filePath}`);
+      console.log(`[SUCCESS] Successfully loaded: ${absoluteUrl}`);
       return data as T;
 
     } catch (error) {
       attempt++;
-      console.error(`[ATTEMPT ${attempt}/${maxAttempts}] Failed to load ${filePath}:`, error);
+      console.error(`[ATTEMPT ${attempt}/${maxAttempts}] Failed to load ${absoluteUrl}:`, error);
       if (attempt >= maxAttempts) {
-        console.error(`[FATAL] All attempts failed for: ${filePath}`);
+        console.error(`[FATAL] All attempts failed for: ${absoluteUrl}`);
         notFoundCache.add(filePath);
         return null;
       }
