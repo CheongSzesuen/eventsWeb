@@ -1,5 +1,6 @@
-import { ApiResponse, Event, RandomEvent, ProvinceData, CityData, SchoolData } from '@/types/events';
+import { ApiResponse, Event,ProvinceData, CityData, SchoolData } from '@/types/events';
 import { EventType } from '@/types/events';
+
 type FetchConfig = {
   basePath?: string;
   cache?: RequestCache;
@@ -111,7 +112,7 @@ export const fetchEvents = async (
     loadWithFallback<{ exam_events: Event[] }>('events/exam/exam.json', {
       exam_events: [],
     }),
-    loadWithFallback<{ random_events: RandomEvent[] }>('events/random.json', {
+    loadWithFallback<{ random_events: Event[]; }>('events/random.json', {
       random_events: [],
     }),
   ]);

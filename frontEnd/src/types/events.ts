@@ -37,8 +37,6 @@ export interface SchoolData {
     start?: Event[];
     special?: Event[];
   };
-  start_count?: number;
-  special_count?: number;
 }
 
 /**
