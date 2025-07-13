@@ -1,3 +1,4 @@
+import path from 'path';
 import { ApiResponse, Event, RandomEvent, ProvinceData, CityData, SchoolData } from '@/types/events';
 
 // 定义请求配置类型
@@ -9,10 +10,13 @@ type FetchConfig = {
 
 // 统一获取数据基础路径
 const getBasePath = () => {
-  return '/data'; // 所有环境下都使用相对路径
+  if (typeof window !== 'undefined') {
+    return '/data'; // 浏览器环境使用相对路径
+  }
+  return path.join(process.cwd(), 'public', 'data'); // Node环境使用绝对路径
 };
 
-// 默认配置对象（只声明一次！）
+// 默认配置对象
 const DEFAULT_CONFIG: FetchConfig = {
   basePath: getBasePath(),
   cache: 'force-cache',
@@ -39,27 +43,38 @@ export async function fetchDataFile<T>(
 
   while (attempt <= maxAttempts) {
     try {
-      const url = new URL(filePath, `${config.basePath}/`).toString();
-      console.log(`[FETCH] 正在请求: ${url}`);
-      const response = await fetch(url, {
-        cache: config.cache,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Request-Source': 'fetchEvents'
+      if (typeof window !== 'undefined') {
+        // 浏览器环境使用fetch
+        const url = `${config.basePath}/${filePath}`;
+        console.log(`[Browser] 正在请求: ${url}`);
+        const response = await fetch(url, {
+          cache: config.cache,
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Request-Source': 'fetchEvents'
+          }
+        });
+
+        if (response.status === 404) {
+          notFoundCache.add(filePath);
+          console.warn(`[NOT FOUND] 文件不存在: ${filePath}`);
+          return null;
+        } else if (!response.ok) {
+          throw new Error(`HTTP ${response.status} - ${response.statusText}`);
         }
-      });
 
-      if (response.status === 404) {
-        notFoundCache.add(filePath);
-        console.warn(`[NOT FOUND] 文件不存在: ${filePath}`);
-        return null;
-      } else if (!response.ok) {
-        throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+        const data = await response.json();
+        console.log(`[SUCCESS] 成功加载: ${filePath}`);
+        return data as T;
+      } else {
+        // Node环境使用fs模块
+        const fs = require('fs').promises;
+        const fullPath = path.join(config.basePath, filePath);
+        console.log(`[Node] 正在读取: ${fullPath}`);
+        const data = await fs.readFile(fullPath, 'utf-8');
+        console.log(`[SUCCESS] 成功加载: ${filePath}`);
+        return JSON.parse(data);
       }
-
-      const data = await response.json();
-      console.log(`[SUCCESS] 成功加载: ${filePath}`);
-      return data as T;
     } catch (error) {
       attempt++;
       console.error(`[ATTEMPT ${attempt}/${maxAttempts}] ${filePath}:`, error);

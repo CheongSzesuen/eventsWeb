@@ -1,3 +1,4 @@
+export const runtime = 'edge';
 import { getProvinceData } from '@/lib/fetchEvents';
 import EventCard from '@/components/EventCard';
 
