@@ -1,4 +1,5 @@
 // frontEnd/app/events/[province]/[city]/[school]/special/page.tsx
+export const runtime = 'edge';
 import { getSchoolsByCity } from '@/lib/fetchEvents';
 import EventCard from '@/components/EventCard';
 
