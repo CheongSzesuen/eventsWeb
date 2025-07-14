@@ -7,22 +7,19 @@ export const runtime = 'edge';
 
 export default async function ProvincePage({ params }: { params: Promise<{ province: string }> }) {
   const { province } = await params;
+
+  console.log(`[DEBUG] Fetching data for province:`, province);
+
   const provinceData = await getProvinceData(province);
 
+  console.log(`[DEBUG] Province Data Result:`, provinceData);
+
   if (!provinceData) {
-    return (
-      <div className="text-xl font-bold text-red-500">
-        省份数据加载失败或不存在
-      </div>
-    );
+    return <div className="text-xl font-bold text-red-500">省份数据加载失败或不存在</div>;
   }
 
   if (provinceData.cities.length === 0) {
-    return (
-      <div className="text-xl font-bold text-gray-500">
-        该省份暂无事件数据
-      </div>
-    );
+    return <div className="text-xl font-bold text-gray-500">该省份暂无事件数据</div>;
   }
 
   return (
@@ -31,6 +28,8 @@ export default async function ProvincePage({ params }: { params: Promise<{ provi
 
       {provinceData.cities.map((city) => {
         const schools = city.schools || [];
+
+        console.log(`[DEBUG] Rendering city:`, city.name, 'with', schools.length, 'schools');
 
         return (
           <div key={city.id} className="mb-16">
@@ -48,6 +47,14 @@ export default async function ProvincePage({ params }: { params: Promise<{ provi
 
                 const hasStartEvents = startEvents.length > 0;
                 const hasSpecialEvents = specialEvents.length > 0;
+
+                console.log(
+                  `[DEBUG] School "${school.name}" has:`,
+                  startEvents.length,
+                  '开学事件,',
+                  specialEvents.length,
+                  '特殊事件'
+                );
 
                 return (
                   <div key={school.id} className="mb-8">
@@ -119,4 +126,4 @@ export default async function ProvincePage({ params }: { params: Promise<{ provi
       })}
     </>
   );
-}
+};

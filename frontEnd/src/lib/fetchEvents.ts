@@ -242,12 +242,19 @@ export const getProvinceData = async (provinceId: string): Promise<ProvinceData 
     return null;
   }
 
+  console.log(`[DEBUG] Province Info:`, provinceInfo);
+
   const cityPromises = Object.entries(provinceInfo.cities || {}).map(
     async ([cityId, cityName]) => {
       const cityFilePath = `events/provinces/${provinceId}/${cityId}.json`;
+      console.log(`[DEBUG] Fetching city data:`, cityFilePath);
+
       const cityData = await fetchDataFile<{ schools: SchoolData[] }>(cityFilePath);
 
-      if (!cityData) return null;
+      if (!cityData) {
+        console.warn(`[DEBUG] City data is null or missing:`, cityFilePath);
+        return null;
+      }
 
       const schools = cityData.schools.map((school): ProcessedSchoolData => ({
         ...school,
@@ -261,9 +268,16 @@ export const getProvinceData = async (provinceId: string): Promise<ProvinceData 
         0
       );
 
+      console.log(`[DEBUG] City "${cityName}" has total events:`, cityTotal);
+
       return cityTotal > 0
         ? { id: cityId, name: cityName, schools, total: cityTotal }
-        : null;
+        : {
+            id: cityId,
+            name: cityName,
+            schools: [],
+            total: 0,
+          };
     }
   );
 
@@ -271,12 +285,15 @@ export const getProvinceData = async (provinceId: string): Promise<ProvinceData 
     (c): c is CityData => c !== null
   ) as CityData[];
 
-  // ✅ 即使没有城市数据，也返回非空结构
+  console.log(`[DEBUG] Final cities loaded for province "${provinceId}":`, cities);
+
+  const provinceTotal = cities.reduce((acc, c) => acc + c.total, 0);
+
   return {
     id: provinceId,
     name: provinceInfo.name,
     cities,
-    total: cities.reduce((acc, c) => acc + c.total, 0),
+    total: provinceTotal,
   };
 };
 

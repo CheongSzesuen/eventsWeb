@@ -2,6 +2,7 @@
 import { fetchEvents } from '@/lib/fetchEvents';
 import EventCard from '@/components/EventCard';
 import { EventType } from '@/types/events';
+
 export default async function EventsPage() {
   const data = await fetchEvents();
   
