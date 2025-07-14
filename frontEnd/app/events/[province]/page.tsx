@@ -67,7 +67,7 @@ export default async function ProvincePage({ params }: { params: Promise<{ provi
                                 key={event.id}
                                 event={{
                                   ...event,
-                                  type: 'school_start',
+                                  type: EventType.SchoolStart
                                   question: event.question || '未命名事件',
                                   choices: event.choices || {},
                                   results: event.results || {},
@@ -93,7 +93,7 @@ export default async function ProvincePage({ params }: { params: Promise<{ provi
                                 key={event.id}
                                 event={{
                                   ...event,
-                                  type: 'school_special',
+                                  type: EventType.SchoolSpecial
                                   question: event.question || '未命名事件',
                                   choices: event.choices || {},
                                   results: event.results || {},
