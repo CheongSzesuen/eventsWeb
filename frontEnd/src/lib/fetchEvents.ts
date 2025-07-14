@@ -128,7 +128,7 @@ export const fetchEvents = async (
 
     const cityPromises = Object.entries(provinceInfo.cities).map(
       async ([cityId, cityName]) => {
-        const cityFilePath = `events/provinces/${provinceId}/${cityId}.json`;
+        const cityFilePath = `/data/events/provinces/${provinceId}/${cityId}.json`;
         const cityData = await loadWithFallback<{ schools: SchoolData[] }>(
           cityFilePath,
           { schools: [] }
@@ -248,7 +248,7 @@ export const getProvinceData = async (
 
   const cityPromises = Object.entries(provinceInfo.cities || {}).map(
     async ([cityId, cityName]) => {
-      const cityFilePath = `events/provinces/${provinceId}/${cityId}.json`;
+      const cityFilePath = `/data/events/provinces/${provinceId}/${cityId}.json`;
       const cityData = await fetchDataFile<{ schools: SchoolData[] }>(cityFilePath);
 
       if (!cityData) return null;
@@ -304,7 +304,7 @@ export const getCityData  = async (
     return null;
   }
 
-  const cityFilePath = `events/provinces/${provinceId}/${cityId}.json`;
+  const cityFilePath = `/data/events/provinces/${provinceId}/${cityId}.json`;
   const cityData = await fetchDataFile<{ schools: SchoolData[] }>(cityFilePath);
 
   if (!cityData) {
