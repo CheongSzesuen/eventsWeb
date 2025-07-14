@@ -1,51 +1,59 @@
-// frontEnd/app/events/[province]/[city]/[school]/page.tsx
-export const runtime = 'edge';
-import { getCityData  } from '@/lib/fetchEvents'; // ✅ 正确函数名
+import { getCityData } from '@/lib/fetchEvents';
 import EventCard from '@/components/EventCard';
 import { EventType } from '@/types/events';
 
-export default async function SchoolPage({
-  params,
-}: {
-  params: Promise<{ province: string; city: string; school: string }>;
-}) {
-  const { province, city, school } = await params;
+export const runtime = 'edge';
 
-  const cityData = await getCityData (province, city); // ✅ 改为驼峰命名
+export default async function SchoolPage({ params }: { params: Promise<{ province: string; city: string; school: string }> }) {
+  const { province, city, school } = await params;
+  const cityData = await getCityData(province, city);
 
   if (!cityData) {
-    return <div className="text-xl font-bold text-red-500">城市数据加载失败或不存在</div>;
+    return (
+      <div className="text-xl font-bold text-red-500">
+        城市数据加载失败或不存在
+      </div>
+    );
   }
 
-  const schoolData = cityData.schools.find(schoolItem => schoolItem.id === school);
+  const schoolData = cityData.schools.find(s => s.id === school);
 
   if (!schoolData) {
-    return <div className="text-xl font-bold text-red-500">学校数据加载失败或不存在</div>;
+    return (
+      <div className="text-xl font-bold text-red-500">
+        学校数据加载失败或不存在
+      </div>
+    );
   }
 
-  const events = schoolData.events || { start: [], special: [] };
-  const startEvents = events.start || [];
-  const specialEvents = events.special || [];
+  const schoolEvents = schoolData.events || { start: [], special: [] };
+  const startEvents = schoolEvents.start || [];
+  const specialEvents = schoolEvents.special || [];
+
+  const hasStartEvents = startEvents.length > 0;
+  const hasSpecialEvents = specialEvents.length > 0;
 
   return (
-    <>
+    <div>
       <h1 className="text-4xl font-bold mb-8">{schoolData.name}</h1>
+
       <div className="ml-4">
+        {!hasStartEvents && !hasSpecialEvents && (
+          <div className="text-gray-500 mb-4">暂无事件</div>
+        )}
+
         {/* 开学事件 */}
-        {startEvents.length > 0 && (
+        {hasStartEvents && (
           <>
-            <h4 className="text-xl font-semibold mb-2">开学事件</h4>
+            <h2 className="text-2xl font-semibold mb-4">开学事件</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {startEvents.map((event) => (
-                <EventCard 
+                <EventCard
                   key={event.id}
                   event={{
                     ...event,
                     type: EventType.SchoolStart,
-                    question: event.question || "未命名学校事件",
-                    choices: event.choices || {},
-                    results: event.results || {},
-                    school: schoolData.name || 'unknown_school',
+                    school: schoolData.name,
                     provinceId: province,
                     cityId: city,
                     schoolId: school,
@@ -58,21 +66,17 @@ export default async function SchoolPage({
         )}
 
         {/* 特殊事件 */}
-        {specialEvents.length > 0 && (
+        {hasSpecialEvents && (
           <>
-            {startEvents.length > 0 && <div className="border-t border-gray-400 mt-4 mb-4"></div>}
-            <h4 className="text-xl font-semibold mb-2 mt-4">特殊事件</h4>
+            <h2 className="text-2xl font-semibold mb-4 mt-6">特殊事件</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {specialEvents.map((event) => (
-                <EventCard 
+                <EventCard
                   key={event.id}
                   event={{
                     ...event,
                     type: EventType.SchoolSpecial,
-                    question: event.question || "未命名学校事件",
-                    choices: event.choices || {},
-                    results: event.results || {},
-                    school: schoolData.name || 'unknown_school',
+                    school: schoolData.name,
                     provinceId: province,
                     cityId: city,
                     schoolId: school,
@@ -84,6 +88,6 @@ export default async function SchoolPage({
           </>
         )}
       </div>
-    </>
+    </div>
   );
 }

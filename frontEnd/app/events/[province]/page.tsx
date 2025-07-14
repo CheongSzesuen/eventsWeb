@@ -1,17 +1,11 @@
 import { getProvinceData } from '@/lib/fetchEvents';
 import EventCard from '@/components/EventCard';
-import { EventType } from '@/types/events'; 
 import { SchoolData, CityData, ProvinceData } from '@/types/events';
 
 export const runtime = 'edge';
 
-export default async function ProvincePage({
-  params,
-}: {
-  params: Promise<{ province: string }>;
-}) {
+export default async function ProvincePage({ params }: { params: Promise<{ province: string }> }) {
   const { province } = await params;
-
   const provinceData = await getProvinceData(province);
 
   if (!provinceData) {
@@ -22,13 +16,17 @@ export default async function ProvincePage({
     );
   }
 
+  if (provinceData.cities.length === 0) {
+    return (
+      <div className="text-xl font-bold text-gray-500">
+        该省份暂无事件数据
+      </div>
+    );
+  }
+
   return (
     <>
       <h1 className="text-4xl font-bold mb-8">{provinceData.name}</h1>
-
-      {provinceData.cities.length === 0 && (
-        <div className="text-gray-500">该省份下暂无城市数据</div>
-      )}
 
       {provinceData.cities.map((city) => {
         const schools = city.schools || [];
@@ -69,8 +67,8 @@ export default async function ProvincePage({
                                 key={event.id}
                                 event={{
                                   ...event,
-                                  type: EventType.SchoolStart, // ✅ 使用枚举
-                                  question: event.question || '未命名学校事件',
+                                  type: 'school_start',
+                                  question: event.question || '未命名事件',
                                   choices: event.choices || {},
                                   results: event.results || {},
                                   school: school.name || 'unknown_school',
@@ -95,8 +93,8 @@ export default async function ProvincePage({
                                 key={event.id}
                                 event={{
                                   ...event,
-                                  type: EventType.SchoolSpecial, // ✅ 使用枚举
-                                  question: event.question || '未命名学校事件',
+                                  type: 'school_special',
+                                  question: event.question || '未命名事件',
                                   choices: event.choices || {},
                                   results: event.results || {},
                                   school: school.name || 'unknown_school',
