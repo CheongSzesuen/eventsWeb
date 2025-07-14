@@ -232,12 +232,8 @@ export const fetchEvents = async (
 /**
  * 获取省份数据
  */
-export const getProvinceData = async (
-  provinceId: string
-): Promise<ProvinceData | null> => {
-  const provinceCityMap = await fetchDataFile<
-    Record<string, { name: string; cities: Record<string, string> }>
-  >('provinceCityMap.json');
+export const getProvinceData = async (provinceId: string): Promise<ProvinceData | null> => {
+  const provinceCityMap = await fetchDataFile<Record<string, { name: string; cities: Record<string, string> }>>('provinceCityMap.json');
 
   const provinceInfo = provinceCityMap?.[provinceId];
 
@@ -275,14 +271,12 @@ export const getProvinceData = async (
     (c): c is CityData => c !== null
   ) as CityData[];
 
-  const provinceTotal = cities.reduce((acc, c) => acc + c.total, 0);
-
-  // ✅ 修改点：即使没有城市数据也返回空省份结构
+  // ✅ 即使没有城市数据，也返回非空结构
   return {
     id: provinceId,
     name: provinceInfo.name,
     cities,
-    total: provinceTotal,
+    total: cities.reduce((acc, c) => acc + c.total, 0),
   };
 };
 
