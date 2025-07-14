@@ -3,16 +3,7 @@
   "shaanxi": {
     "name": "陕西",
     "cities": {
-      "xian": "西安",
       "hanzhong": "汉中"
-    }
-  },
-  "gansu": {
-    "name": "甘肃",
-    "cities": {
-      "lanzhou": "兰州",
-      "jiayuguan": "嘉峪关",
-      "jinchang": "金昌"
     }
   }
   
