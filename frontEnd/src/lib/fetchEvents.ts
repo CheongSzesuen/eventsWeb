@@ -242,19 +242,12 @@ export const getProvinceData = async (provinceId: string): Promise<ProvinceData 
     return null;
   }
 
-  console.log(`[DEBUG] Province Info:`, provinceInfo);
-
   const cityPromises = Object.entries(provinceInfo.cities || {}).map(
     async ([cityId, cityName]) => {
       const cityFilePath = `events/provinces/${provinceId}/${cityId}.json`;
-      console.log(`[DEBUG] Fetching city data:`, cityFilePath);
-
       const cityData = await fetchDataFile<{ schools: SchoolData[] }>(cityFilePath);
 
-      if (!cityData) {
-        console.warn(`[DEBUG] City data is null or missing:`, cityFilePath);
-        return null;
-      }
+      if (!cityData) return null;
 
       const schools = cityData.schools.map((school): ProcessedSchoolData => ({
         ...school,
@@ -268,16 +261,9 @@ export const getProvinceData = async (provinceId: string): Promise<ProvinceData 
         0
       );
 
-      console.log(`[DEBUG] City "${cityName}" has total events:`, cityTotal);
-
       return cityTotal > 0
         ? { id: cityId, name: cityName, schools, total: cityTotal }
-        : {
-            id: cityId,
-            name: cityName,
-            schools: [],
-            total: 0,
-          };
+        : null;
     }
   );
 
@@ -285,15 +271,12 @@ export const getProvinceData = async (provinceId: string): Promise<ProvinceData 
     (c): c is CityData => c !== null
   ) as CityData[];
 
-  console.log(`[DEBUG] Final cities loaded for province "${provinceId}":`, cities);
-
-  const provinceTotal = cities.reduce((acc, c) => acc + c.total, 0);
-
+  // ✅ 即使没有城市数据，也返回非空结构
   return {
     id: provinceId,
     name: provinceInfo.name,
     cities,
-    total: provinceTotal,
+    total: cities.reduce((acc, c) => acc + c.total, 0),
   };
 };
 
