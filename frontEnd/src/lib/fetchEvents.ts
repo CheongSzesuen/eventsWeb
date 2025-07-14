@@ -254,11 +254,11 @@ export const getProvinceData = async (
       if (!cityData) return null;
 
       const schools = cityData.schools.map((school): ProcessedSchoolData => ({
-  ...school,
-  events: school.events || { start: [], special: [] },
-  start_count: school.events.start?.length || 0,
-  special_count: school.events.special?.length || 0,
-}));
+        ...school,
+        events: school.events || { start: [], special: [] },
+        start_count: school.events.start?.length || 0,
+        special_count: school.events.special?.length || 0,
+      }));
 
       const cityTotal = schools.reduce(
         (acc, s) => acc + s.start_count + s.special_count,
@@ -271,13 +271,13 @@ export const getProvinceData = async (
     }
   );
 
- const cities = (await Promise.all(cityPromises))
-  .filter((c): c is CityData => c !== null) as CityData[];
-
-  if (cities.length === 0) return null;
+  const cities = (await Promise.all(cityPromises)).filter(
+    (c): c is CityData => c !== null
+  ) as CityData[];
 
   const provinceTotal = cities.reduce((acc, c) => acc + c.total, 0);
 
+  // ✅ 修改点：即使没有城市数据也返回空省份结构
   return {
     id: provinceId,
     name: provinceInfo.name,
@@ -289,7 +289,7 @@ export const getProvinceData = async (
 /**
  * 获取城市数据
  */
-export const getCityData  = async (
+export const getCityData = async (
   provinceId: string,
   cityId: string
 ): Promise<CityData | null> => {
@@ -308,7 +308,7 @@ export const getCityData  = async (
   const cityData = await fetchDataFile<{ schools: SchoolData[] }>(cityFilePath);
 
   if (!cityData) {
-    // 如果城市数据不存在，返回一个空结构而非 null
+    // ✅ 返回空城市结构，而不是 null
     return {
       id: cityId,
       name: cityName,
@@ -318,11 +318,11 @@ export const getCityData  = async (
   }
 
   const schools = cityData.schools.map((school): ProcessedSchoolData => ({
-  ...school,
-  events: school.events || { start: [], special: [] },
-  start_count: school.events.start?.length || 0,
-  special_count: school.events.special?.length || 0,
-}));
+    ...school,
+    events: school.events || { start: [], special: [] },
+    start_count: school.events.start?.length || 0,
+    special_count: school.events.special?.length || 0,
+  }));
 
   const cityTotal = schools.reduce(
     (acc, s) => acc + s.start_count + s.special_count,
@@ -344,6 +344,6 @@ export const getSchoolsByCity = async (
   provinceId: string,
   cityId: string
 ): Promise<SchoolData[]> => {
-  const cityData = await getCityData (provinceId, cityId);
+  const cityData = await getCityData(provinceId, cityId);
   return cityData?.schools || [];
 };
