@@ -335,9 +335,55 @@ export const getCityData = async (
  * 获取城市下的所有学校
  */
 export const getSchoolsByCity = async (
-  provinceId: string,
-  cityId: string
+  provinceName: string,
+  cityName: string
 ): Promise<SchoolData[]> => {
-  const cityData = await getCityData(provinceId, cityId);
-  return cityData?.schools || [];
+  try {
+    // 1. 加载省份城市映射
+    const provinceCityMap = await fetchDataFile<Record<string, {
+      name: string;
+      cities: Record<string, string>;
+    }>>('provinceCityMap.json');
+
+    if (!provinceCityMap) {
+      console.warn('省份城市映射数据加载失败，返回空数组');
+      return [];
+    }
+
+    // 2. 查找匹配省份
+    const provinceEntry = Object.entries(provinceCityMap).find(
+      ([, info]) => info.name === provinceName
+    );
+
+    if (!provinceEntry) {
+      console.warn(`找不到省份【${provinceName}】，返回空数组`);
+      return [];
+    }
+
+    const [provinceId, provinceInfo] = provinceEntry;
+
+    // 3. 查找匹配城市
+    const cityEntry = Object.entries(provinceInfo.cities).find(
+      ([, name]) => name === cityName
+    );
+
+    if (!cityEntry) {
+      console.warn(`在省份【${provinceName}】中找不到城市【${cityName}】，返回空数组`);
+      return [];
+    }
+
+    const [cityId] = cityEntry;
+
+    // 4. 构建文件路径
+    const cityFilePath = `events/provinces/${provinceId}/${cityId}.json`;
+    
+    // 5. 加载城市数据（静默失败）
+    const cityData = await fetchDataFile<{ schools: SchoolData[] }>(cityFilePath);
+    
+    // 6. 返回数据或空数组
+    return cityData?.schools || [];
+  } catch (error) {
+    console.warn('获取学校数据时出错，返回空数组:', error);
+    return [];
+  }
 };
