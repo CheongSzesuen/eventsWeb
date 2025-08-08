@@ -1,32 +1,31 @@
-// frontEnd/src/types/provinceCityMap.ts
 import { SchoolData } from '@/types/events';
 
 /**
- * 城市数据结构
+ * 城市信息
  */
-export interface CityData {
-  id: string;
+export interface CityInfo {
   name: string;
-  schools: SchoolData[];
-  total: number;
+  schools?: SchoolData[];
 }
 
 /**
- * 省份数据结构
+ * 省份信息
  */
-export interface ProvinceData {
-  id: string;
+export interface ProvinceInfo {
   name: string;
   cities: {
-    [cityKey: string]: CityData;
+    [cityId: string]: string; // 城市ID到城市名的映射
   };
-  schools?: SchoolData[];
-  total?: number;
 }
 
 /**
  * 省份城市映射表
  */
 export interface ProvinceCityMap {
-  [provinceKey: string]: ProvinceData;
+  [provinceId: string]: {
+    name: string;
+    cities: {
+      [cityId: string]: string;
+    };
+  };
 }

@@ -1,19 +1,32 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getSchoolsByCity } from '@/lib/fetchEvents';
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
-import { ProvinceCityMap } from '@/types/provinceCityMap';
+import provinceCityMap from '@/public/data/provinceCityMap.json';
 
-export default function SchoolSelect() {
+// 定义类型
+interface ProvinceData {
+  name: string;
+  cities: Record<string, string>;
+}
+
+interface ProvinceCityMap {
+  [key: string]: ProvinceData;
+}
+
+// 使用类型断言
+const typedProvinceCityMap = provinceCityMap as unknown as ProvinceCityMap;
+
+// 主内容组件
+function SchoolSelectContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [confirmed, setConfirmed] = useState(false);
   const [selectedProvince, setSelectedProvince] = useState(searchParams?.get('province') || '');
   const [selectedCity, setSelectedCity] = useState(searchParams?.get('city') || '');
   const [cities, setCities] = useState<string[]>([]);
-  const [loadingProvinceData, setLoadingProvinceData] = useState(true);
   const [schools, setSchools] = useState<{id: string, name: string}[]>([]);
   const [newSchoolName, setNewSchoolName] = useState('');
   const [newSchoolZhName, setNewSchoolZhName] = useState('');
@@ -21,46 +34,28 @@ export default function SchoolSelect() {
   const [loading, setLoading] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showAddSchool, setShowAddSchool] = useState(false);
-  const [provinceCityData, setProvinceCityData] = useState<ProvinceCityMap | null>(null);
-  const [provinceList, setProvinceList] = useState<{id: string, name: string}[]>([]);
+  
+  // 直接从导入的数据生成省份列表
+  const provinceList = Object.entries(typedProvinceCityMap).map(([id, province]) => ({
+    id,
+    name: province.name
+  }));
 
   useEffect(() => {
-    const loadProvinceCityData = async () => {
-      try {
-        const response = await fetch('/data/provinceCityMap.json');
-        const data: ProvinceCityMap = await response.json();
-        setProvinceCityData(data);
-        
-        const provinces = Object.entries(data).map(([id, province]) => ({
-          id,
-          name: province.name
-        }));
-        setProvinceList(provinces);
-        
-        // If province is in URL params, load its cities
-        if (searchParams?.get('province')) {
-          const provinceId = searchParams.get('province') || '';
-          const province = data[provinceId];
-          if (province && province.cities) {
-            // cityNames 是对象数组，需映射为名称数组
-            const cityNames = Object.values(province.cities).map(city => typeof city === 'string' ? city : city.name);
-            setCities(cityNames);
-            setSelectedProvince(provinceId);
-          }
-        }
-        
-        // If city is in URL params, set it
-        if (searchParams?.get('city')) {
-          setSelectedCity(searchParams.get('city') || '');
-        }
-      } catch (error) {
-        console.error('加载省份城市数据失败:', error);
-      } finally {
-        setLoadingProvinceData(false);
+    // 初始化时设置城市列表（如果URL中有省份参数）
+    if (searchParams?.get('province')) {
+      const provinceId = searchParams.get('province') || '';
+      const province = typedProvinceCityMap[provinceId];
+      if (province && province.cities) {
+        const cityNames = Object.values(province.cities);
+        setCities(cityNames);
+        setSelectedProvince(provinceId);
       }
-    };
+    }
     
-    loadProvinceCityData();
+    if (searchParams?.get('city')) {
+      setSelectedCity(searchParams.get('city') || '');
+    }
   }, [searchParams]);
 
   useEffect(() => {
@@ -68,14 +63,13 @@ export default function SchoolSelect() {
       if (selectedCity && selectedProvince) {
         setLoading(true);
         try {
-          const provinceName = provinceList.find(p => p.id === selectedProvince)?.name || '';
+          const provinceName = typedProvinceCityMap[selectedProvince]?.name || '';
           const schoolsData = await getSchoolsByCity(provinceName, selectedCity);
           setSchools(schoolsData.map(school => ({
             id: school.id,
             name: school.name
           })));
           
-          // Update URL with current selections
           const newParams = new URLSearchParams();
           newParams.set('province', selectedProvince);
           newParams.set('city', selectedCity);
@@ -88,19 +82,17 @@ export default function SchoolSelect() {
       }
     };
     loadSchools();
-  }, [selectedCity, selectedProvince, provinceList, router]);
+  }, [selectedCity, selectedProvince, router]);
 
   const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const provinceId = e.target.value;
     setSelectedProvince(provinceId);
     setSelectedCity('');
 
-    if (provinceId && provinceCityData) {
-      const province = provinceCityData[provinceId];
-      if (province && province.cities) {
-        // cityNames 是对象数组，需映射为名称数组
-        const cityNames = Object.values(province.cities).map(city => typeof city === 'string' ? city : city.name);
-        setCities(cityNames);
+    if (provinceId) {
+      const province = typedProvinceCityMap[provinceId];
+      if (province?.cities) {
+        setCities(Object.values(province.cities));
       } else {
         setCities([]);
       }
@@ -117,7 +109,6 @@ export default function SchoolSelect() {
         setConfirmed(true);
         setIsTransitioning(false);
         
-        // Update URL with current selections
         const newParams = new URLSearchParams();
         newParams.set('province', selectedProvince);
         newParams.set('city', selectedCity);
@@ -128,54 +119,60 @@ export default function SchoolSelect() {
 
   const handleSelectSchool = (schoolId: string) => {
     setSelectedSchool(schoolId);
-    const provinceName = provinceCityData?.[selectedProvince]?.name || '';
-    router.push(`/contribute?type=school&province=${encodeURIComponent(provinceName)}&city=${encodeURIComponent(selectedCity)}&school=${encodeURIComponent(schoolId)}`);
+    const provinceName = typedProvinceCityMap[selectedProvince]?.name || '';
+    router.push(
+      `/contribute?type=school&province=${encodeURIComponent(provinceName)}&city=${encodeURIComponent(selectedCity)}&school=${encodeURIComponent(schoolId)}`
+    );
   };
 
-  const handleAddSchool = async () => {
+  const handleAddSchool = () => {
     if (!newSchoolName.trim() || !newSchoolZhName.trim()) {
       console.error('请填写完整的学校信息');
       return;
     }
-    const provinceName = provinceCityData?.[selectedProvince]?.name || '';
-    router.push(`/contribute?type=school&province=${encodeURIComponent(provinceName)}&city=${encodeURIComponent(selectedCity)}&school=${encodeURIComponent(newSchoolName)}&schoolZh=${encodeURIComponent(newSchoolZhName)}`);
-  };
-
-  const handleGoBack = () => {
-    router.push('/contribute');
+    const provinceName = typedProvinceCityMap[selectedProvince]?.name || '';
+    router.push(
+      `/contribute?type=school&province=${encodeURIComponent(provinceName)}&city=${encodeURIComponent(selectedCity)}&school=${encodeURIComponent(newSchoolName)}&schoolZh=${encodeURIComponent(newSchoolZhName)}`
+    );
   };
 
   if (!confirmed) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 py-8">
-          {/* Modified header without back button */}
           <h1 className="text-3xl font-bold text-gray-800 mb-8 text-center">
             手动选择城市
           </h1>
 
-          <form onSubmit={handleConfirmLocation} className={`bg-white rounded-xl shadow-md p-6 transition-opacity duration-200 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
+          <form 
+            onSubmit={handleConfirmLocation} 
+            className={`bg-white rounded-xl shadow-md p-6 transition-opacity duration-200 ${
+              isTransitioning ? 'opacity-0' : 'opacity-100'
+            }`}
+          >
             <div className="space-y-6">
               <div>
-                <label className="block text-lg font-medium text-gray-700 mb-2">选择省份</label>
+                <label className="block text-lg font-medium text-gray-700 mb-2">
+                  选择省份
+                </label>
                 <select
                   value={selectedProvince}
                   onChange={handleProvinceChange}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-lg"
                 >
                   <option value="">请选择省份</option>
-                  {loadingProvinceData ? (
-                    <option value="">加载中...</option>
-                  ) : (
-                    provinceList.map(province => (
-                      <option key={province.id} value={province.id}>{province.name}</option>
-                    ))
-                  )}
+                  {provinceList.map(province => (
+                    <option key={province.id} value={province.id}>
+                      {province.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-lg font-medium text-gray-700 mb-2">选择城市</label>
+                <label className="block text-lg font-medium text-gray-700 mb-2">
+                  选择城市
+                </label>
                 <select
                   value={selectedCity}
                   onChange={(e) => setSelectedCity(e.target.value)}
@@ -231,7 +228,10 @@ export default function SchoolSelect() {
           </h1>
         </div>
 
-        <div className={`bg-white rounded-xl shadow-md p-6 transition-opacity duration-200 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
+        <div className={`bg-white rounded-xl shadow-md p-6 transition-opacity duration-200 ${
+          isTransitioning ? 'opacity-0' : 'opacity-100'
+        }`}
+        >
           {loading ? (
             <div className="flex justify-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -250,21 +250,27 @@ export default function SchoolSelect() {
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-gray-700 mb-2">学校中文名称（使用谐音替换原来的名字）</label>
+                  <label className="block text-gray-700 mb-2">
+                    学校中文名称（使用谐音替换原来的名字）
+                  </label>
                   <input
                     type="text"
                     value={newSchoolZhName}
                     onChange={(e) => setNewSchoolZhName(e.target.value)}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                    required
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-700 mb-2">学校真正的英文名</label>
+                  <label className="block text-gray-700 mb-2">
+                    学校真正的英文名
+                  </label>
                   <input
                     type="text"
                     value={newSchoolName}
                     onChange={(e) => setNewSchoolName(e.target.value)}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                    required
                   />
                 </div>
               </div>
@@ -304,7 +310,9 @@ export default function SchoolSelect() {
                       }`}
                     >
                       <div className="font-medium text-gray-800">{school.name}</div>
-                      <div className="text-gray-500 text-sm mt-1">{school.id.replace(/-/g, ' ')}</div>
+                      <div className="text-gray-500 text-sm mt-1">
+                        {school.id.replace(/-/g, ' ')}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -323,5 +331,18 @@ export default function SchoolSelect() {
         </div>
       </div>
     </div>
+  );
+}
+
+// 页面组件（添加Suspense边界）
+export default function SchoolSelectPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    }>
+      <SchoolSelectContent />
+    </Suspense>
   );
 }

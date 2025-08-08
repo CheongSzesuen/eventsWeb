@@ -2,6 +2,7 @@ import { fetchEvents } from '@/lib/fetchEvents';
 import EventCard from '@/components/EventCard';
 import type { ProvinceData, CityData, SchoolData } from '@/types/events';
 import { EventType } from '@/types/events'; 
+export const dynamic = 'force-static'; 
 export default async function HomePage() {
   let data;
   try {

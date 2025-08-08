@@ -1,4 +1,3 @@
-// frontEnd/components/NavBar.tsx
 'use client';
 
 import { Bars3Icon, XMarkIcon, PlusIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
@@ -17,12 +16,15 @@ export default function NavBar({
   isMobile: boolean;
 }) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [showDropdown, setShowDropdown] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  let timeoutId: NodeJS.Timeout;
+  // 注释掉的下拉菜单相关状态
+  // const [showDropdown, setShowDropdown] = useState(false);
+  // const dropdownRef = useRef<HTMLDivElement>(null);
+  // let timeoutId: NodeJS.Timeout;
 
   const navBarClasses = "w-full bg-white shadow-sm";
 
+  // 注释掉的下拉菜单相关方法
+  /*
   const handleMouseLeave = () => {
     if (!isMobile) {
       timeoutId = setTimeout(() => {
@@ -46,6 +48,7 @@ export default function NavBar({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+  */
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -54,6 +57,8 @@ export default function NavBar({
     }
   };
 
+  // 注释掉的下拉菜单点击处理方法
+  /*
   const handleContributeClick = (type: string) => {
     switch(type) {
       case 'random':
@@ -67,6 +72,11 @@ export default function NavBar({
         break;
     }
     setShowDropdown(false);
+  };
+  */
+
+  const handleExternalContributeClick = () => {
+    window.open('https://contribute.events.okschoollife.fun/', '_blank');
   };
 
   return (
@@ -120,56 +130,69 @@ export default function NavBar({
             </button>
           </div>
         </form>
-        <div 
-          className="relative"
-          ref={dropdownRef}
-          onMouseEnter={() => {
-            if (!isMobile) {
-              cancelTimeout();
-              setShowDropdown(true);
-            }
-          }}
-          onMouseLeave={handleMouseLeave}
-        >
+        <div className="relative">
+          {/* 注释掉的原贡献按钮和下拉菜单 */}
+          {/*
+          <div 
+            ref={dropdownRef}
+            onMouseEnter={() => {
+              if (!isMobile) {
+                cancelTimeout();
+                setShowDropdown(true);
+              }
+            }}
+            onMouseLeave={handleMouseLeave}
+          >
+            <button
+              onClick={() => setShowDropdown(!showDropdown)}
+              className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md whitespace-nowrap"
+            >
+              <span className="flex items-center">
+                <PlusIcon className="w-4 h-4 mr-1" />
+                贡献新事件
+              </span>
+              <ChevronDownIcon className={`w-4 h-4 ml-1 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {showDropdown && (
+              <div 
+                className={`absolute right-0 mt-1 bg-white rounded-md shadow-lg z-50 border border-gray-200 ${isMobile ? 'animate-fade-in' : ''}`}
+                onMouseEnter={!isMobile ? cancelTimeout : undefined}
+                onMouseLeave={!isMobile ? handleMouseLeave : undefined}
+              >
+                <div className="py-1 w-auto min-w-[120px]">
+                  <button
+                    onClick={() => handleContributeClick('random')}
+                    className="block w-full px-4 py-2 text-center text-gray-700 hover:bg-blue-50 transition-colors whitespace-nowrap"
+                  >
+                    随机事件
+                  </button>
+                  <button
+                    onClick={() => handleContributeClick('school')}
+                    className="block w-full px-4 py-2 text-center text-gray-700 hover:bg-blue-50 transition-colors whitespace-nowrap"
+                  >
+                    学校事件
+                  </button>
+                  <button
+                    onClick={() => handleContributeClick('exam')}
+                    className="block w-full px-4 py-2 text-center text-gray-700 hover:bg-blue-50 transition-colors whitespace-nowrap"
+                  >
+                    考试事件
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+          */}
+          
+          {/* 新添加的外部贡献按钮 */}
           <button
-            onClick={() => setShowDropdown(!showDropdown)}
+            onClick={handleExternalContributeClick}
             className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md whitespace-nowrap"
           >
-            <span className="flex items-center">
-              <PlusIcon className="w-4 h-4 mr-1" />
-              贡献新事件
-            </span>
-            <ChevronDownIcon className={`w-4 h-4 ml-1 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+            <PlusIcon className="w-4 h-4 mr-1" />
+            贡献新事件
           </button>
-          
-          {showDropdown && (
-            <div 
-              className={`absolute right-0 mt-1 bg-white rounded-md shadow-lg z-50 border border-gray-200 ${isMobile ? 'animate-fade-in' : ''}`}
-              onMouseEnter={!isMobile ? cancelTimeout : undefined}
-              onMouseLeave={!isMobile ? handleMouseLeave : undefined}
-            >
-              <div className="py-1 w-auto min-w-[120px]">
-                <button
-                  onClick={() => handleContributeClick('random')}
-                  className="block w-full px-4 py-2 text-center text-gray-700 hover:bg-blue-50 transition-colors whitespace-nowrap"
-                >
-                  随机事件
-                </button>
-                <button
-                  onClick={() => handleContributeClick('school')}
-                  className="block w-full px-4 py-2 text-center text-gray-700 hover:bg-blue-50 transition-colors whitespace-nowrap"
-                >
-                  学校事件
-                </button>
-                <button
-                  onClick={() => handleContributeClick('exam')}
-                  className="block w-full px-4 py-2 text-center text-gray-700 hover:bg-blue-50 transition-colors whitespace-nowrap"
-                >
-                  考试事件
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </header>

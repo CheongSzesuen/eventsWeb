@@ -1,7 +1,9 @@
 // frontEnd/app/events/random/page.tsx
 import { fetchEvents } from '@/lib/fetchEvents';
 import EventCard from '@/components/EventCard';
-
+export const runtime = 'edge';
+export const dynamic = 'auto';
+export const revalidate = 3600;
 export default async function RandomEventsPage() {
   const data = await fetchEvents();
   const randomEvents = data.random_events || [];

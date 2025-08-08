@@ -4,6 +4,11 @@ import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import ReCAPTCHA from 'react-google-recaptcha';
+import provinceCityMap from '@/public/data/provinceCityMap.json';
+import type { ProvinceCityMap } from '@/types/provinceCityMap';
+
+// 使用双重类型断言确保类型安全
+const typedProvinceCityMap = provinceCityMap as unknown as ProvinceCityMap;
 
 interface RandomResult {
   id: string;
@@ -23,16 +28,28 @@ interface Option {
   randomResults: RandomResult[];
 }
 
-interface FormData {
-  type: string;
-  province: string;
-  city: string;
-  school: string;
-  schoolZh: string;
-  problem: string;
-  options: Option[];
+interface SchoolMap {
+  [key: string]: string;
+}
+
+interface BackendSubmitData {
+  type: 'school' | 'random' | 'exam';
+  question: string;
+  text: string;
+  choices: Record<string, string>;
+  results: Record<string, string>;
+  randomResults?: Record<string, Array<{
+    text: string;
+    prob: number;
+    end_game?: boolean;
+    achievement?: string;
+  }>>;
   contributors: string[];
   recaptchaToken: string;
+  province?: string;
+  city?: string;
+  school?: string;
+  schoolZh?: string;
 }
 
 function ContributeContent() {
@@ -44,6 +61,7 @@ function ContributeContent() {
   const province = searchParams?.get('province') || '';
   const schoolZh = searchParams?.get('schoolZh') || '';
   
+  const [schoolMap, setSchoolMap] = useState<SchoolMap>({});
   const [options, setOptions] = useState<Option[]>([
     {
       id: 1,
@@ -76,16 +94,21 @@ function ContributeContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // 获取显示名称
+  useEffect(() => {
+    const loadSchoolMap = async () => {
+      try {
+        const response = await fetch('/data/schoolMap.json');
+        setSchoolMap(await response.json());
+      } catch (error) {
+        console.error('加载学校数据失败:', error);
+      }
+    };
+    loadSchoolMap();
+  }, []);
+
   const getDisplayName = () => {
     if (schoolZh) return schoolZh;
-    
-    switch(school) {
-      case 'yangxian-high-school': return '羊县中学';
-      case 'hanzhong-high-school-of-shaanxi-province': return '闪西省汗忠中学';
-      case 'hanzhong-long-gang-school': return '汗忠市龙港学校';
-      default: return formatSchoolId(school);
-    }
+    return schoolMap[school] || formatSchoolId(school);
   };
 
   const formatSchoolId = (id: string) => {
@@ -94,7 +117,49 @@ function ContributeContent() {
       .join(' ');
   };
 
-  // 选项操作
+  const getLocationDisplay = () => {
+    const provinceName = typedProvinceCityMap[province]?.name || province;
+    const cityName = typedProvinceCityMap[province]?.cities[city] || city;
+    return `${provinceName}${cityName ? `-${cityName}` : ''}`;
+  };
+
+  const transformToBackendFormat = (): BackendSubmitData => {
+    return {
+      type: type as 'school' | 'random' | 'exam',
+      question: problemDescription,
+      text: problemDescription,
+      choices: options.reduce((acc, option) => {
+        acc[option.id] = option.text;
+        return acc;
+      }, {} as Record<string, string>),
+      results: options.reduce((acc, option) => {
+        acc[option.id] = option.result;
+        return acc;
+      }, {} as Record<string, string>),
+      ...(options.some(opt => opt.isRandom) ? {
+        randomResults: options.reduce((acc, option) => {
+          if (option.isRandom && option.randomResults.length > 0) {
+            acc[option.id] = option.randomResults.map(res => ({
+              text: res.text,
+              prob: res.prob,
+              ...(res.isEndGame ? { end_game: true } : {}),
+              ...(res.achievement ? { achievement: res.achievement } : {})
+            }));
+          }
+          return acc;
+        }, {} as Record<string, any>)
+      } : {}),
+      contributors: contributors.filter(c => c.trim()),
+      recaptchaToken: recaptchaToken || '',
+      ...(type === 'school' ? {
+        province,
+        city,
+        school,
+        schoolZh: schoolMap[school] || ''
+      } : {})
+    };
+  };
+
   const addOption = () => {
     setOptions([
       ...options,
@@ -124,37 +189,35 @@ function ContributeContent() {
     ));
   };
 
-  // 随机结果操作
   const addRandomResult = (optionId: number) => {
-    setOptions(options.map(option =>
-      option.id === optionId
-        ? {
-            ...option,
-            randomResults: [
-              ...option.randomResults,
-              { 
-                id: `random${option.randomResults.length + 1}`, 
-                text: '', 
-                achievement: '', 
-                prob: 0, 
-                isEndGame: false 
-              }
-            ],
+    setOptions(options.map(option => {
+      if (option.id !== optionId) return option;
+      
+      const newId = `random${option.randomResults.length + 1}`;
+      return {
+        ...option,
+        randomResults: [
+          ...option.randomResults,
+          { 
+            id: newId, 
+            text: '', 
+            achievement: '', 
+            prob: 0, 
+            isEndGame: false 
           }
-        : option
-    ));
+        ]
+      };
+    }));
   };
 
   const removeRandomResult = (optionId: number, randomId: string) => {
-    if (options.find(o => o.id === optionId)?.randomResults.length <= 2) return;
-    setOptions(options.map(option =>
-      option.id === optionId
-        ? {
-            ...option,
-            randomResults: option.randomResults.filter(r => r.id !== randomId)
-          }
-        : option
-    ));
+    setOptions(options.map(option => {
+      if (option.id !== optionId || option.randomResults.length <= 2) return option;
+      return {
+        ...option,
+        randomResults: option.randomResults.filter(r => r.id !== randomId)
+      };
+    }));
   };
 
   const handleRandomResultChange = (
@@ -163,41 +226,38 @@ function ContributeContent() {
     field: keyof RandomResult,
     value: string | number | boolean
   ) => {
-    setOptions(options.map(option =>
-      option.id === optionId
-        ? {
-            ...option,
-            randomResults: option.randomResults.map(r => 
-              r.id === randomId ? { ...r, [field]: value } : r
-            )
-          }
-        : option
-    ));
+    setOptions(options.map(option => {
+      if (option.id !== optionId) return option;
+      return {
+        ...option,
+        randomResults: option.randomResults.map(r => 
+          r.id === randomId ? { ...r, [field]: value } : r
+        )
+      };
+    }));
   };
 
   const toggleRandom = (id: number, isRandom: boolean) => {
-    setOptions(options.map(option =>
-      option.id === id
-        ? {
-            ...option,
-            isRandom,
-            result: isRandom ? '' : option.result,
-            achievement: isRandom ? '' : option.achievement,
-            isEndGame: isRandom ? false : option.isEndGame,
-            randomResults: isRandom
-              ? [
-                  { id: 'random1', text: '', achievement: '', prob: 0.5, isEndGame: false },
-                  { id: 'random2', text: '', achievement: '', prob: 0.5, isEndGame: false },
-                ]
-              : option.randomResults
-          }
-        : option
-    ));
+    setOptions(options.map(option => {
+      if (option.id !== id) return option;
+      return {
+        ...option,
+        isRandom,
+        result: isRandom ? '' : option.result,
+        achievement: isRandom ? '' : option.achievement,
+        isEndGame: isRandom ? false : option.isEndGame,
+        randomResults: isRandom
+          ? [
+              { id: 'random1', text: '', achievement: '', prob: 0.5, isEndGame: false },
+              { id: 'random2', text: '', achievement: '', prob: 0.5, isEndGame: false },
+            ]
+          : option.randomResults
+      };
+    }));
   };
 
-  // 贡献者操作
   const addContributor = () => {
-    if (contributors.some(c => c.trim())) {
+    if (contributors[0]?.trim()) {
       setContributors([...contributors, '']);
     }
   };
@@ -215,7 +275,6 @@ function ContributeContent() {
     setContributors(newContributors);
   };
 
-  // 表单验证
   const validateForm = (): boolean => {
     if (!problemDescription.trim()) {
       setSubmitError('请填写问题描述');
@@ -229,7 +288,7 @@ function ContributeContent() {
 
     if (options.some(opt => 
       opt.isRandom && 
-      opt.randomResults.reduce((sum, r) => sum + (r.prob || 0), 0) !== 1
+      Math.abs(opt.randomResults.reduce((sum, r) => sum + (r.prob || 0), 0) - 1) > 0.01
     )) {
       setSubmitError('随机选项的概率总和必须等于1');
       return false;
@@ -240,11 +299,17 @@ function ContributeContent() {
       return false;
     }
 
+    if (type === 'school') {
+      if (!province || !city || !school) {
+        setSubmitError('学校事件必须包含完整的地区信息');
+        return false;
+      }
+    }
+
     setSubmitError(null);
     return true;
   };
 
-  // 提交处理
   const handleSubmit = async () => {
     if (!recaptchaToken) {
       setSubmitError('请完成人机验证');
@@ -255,33 +320,20 @@ function ContributeContent() {
 
     setIsSubmitting(true);
     try {
-      const formData: FormData = {
-        type,
-        province,
-        city,
-        school,
-        schoolZh,
-        problem: problemDescription,
-        options: options.map(opt => ({
-          ...opt,
-          randomResults: opt.isRandom ? opt.randomResults : undefined
-        })),
-        contributors: contributors.filter(c => c.trim()),
-        recaptchaToken
-      };
+      const transformedData = transformToBackendFormat();
 
       const response = await fetch('https://eventsapi.okschoollife.fun/api/events', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Origin': window.location.origin 
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(transformedData)
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || '提交失败');
+        throw new Error(error.message || `提交失败: ${response.status}`);
       }
 
       const data = await response.json();
@@ -296,7 +348,6 @@ function ContributeContent() {
 
   return (
     <div className="max-w-4xl mx-auto p-4">
-      {/* Header Section */}
       <div className="flex items-center gap-4 mb-6">
         <button
           onClick={() => router.push(`/contribute/school-select?city=${city}&province=${province}`)}
@@ -313,7 +364,7 @@ function ContributeContent() {
           {type === 'school' && (
             <div className="flex gap-2 mt-2">
               <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">
-                {province}-{city}
+                {getLocationDisplay()}
               </span>
               <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">
                 ID: {school}
@@ -331,7 +382,6 @@ function ContributeContent() {
         )}
 
         <div className="space-y-6">
-          {/* Problem Description */}
           <div className="bg-white p-4 rounded-lg border border-gray-200">
             <label className="block text-base font-medium text-gray-700 mb-2">
               问题描述:
@@ -346,7 +396,6 @@ function ContributeContent() {
             />
           </div>
 
-          {/* Options Section */}
           <div className="bg-white p-4 rounded-lg border border-gray-200">
             <label className="block text-base font-medium text-gray-700 mb-2">
               选项: <span className="text-sm text-gray-500">(至少需要2个)</span>
@@ -374,8 +423,7 @@ function ContributeContent() {
                     )}
                   </div>
 
-                  {/* Normal Result */}
-                  {!option.isRandom && (
+                  {!option.isRandom ? (
                     <div className="space-y-3">
                       <input
                         type="text"
@@ -403,10 +451,7 @@ function ContributeContent() {
                         </label>
                       </div>
                     </div>
-                  )}
-
-                  {/* Random Results */}
-                  {option.isRandom && (
+                  ) : (
                     <div className="space-y-3 mt-3">
                       <div className="flex items-center justify-between">
                         <span className="text-base font-medium text-gray-700">随机结果:</span>
@@ -478,14 +523,13 @@ function ContributeContent() {
 
                       <div className="text-sm text-gray-600">
                         总概率: {option.randomResults.reduce((sum, r) => sum + (r.prob || 0), 0).toFixed(2)}
-                        {option.randomResults.reduce((sum, r) => sum + (r.prob || 0), 0) !== 1 && (
+                        {Math.abs(option.randomResults.reduce((sum, r) => sum + (r.prob || 0), 0) - 1) > 0.01 && (
                           <span className="text-red-600 ml-2">概率总和必须等于1</span>
                         )}
                       </div>
                     </div>
                   )}
 
-                  {/* Random Toggle */}
                   <div className="flex items-center mt-3">
                     <label className="flex items-center cursor-pointer gap-2">
                       <input
@@ -510,7 +554,6 @@ function ContributeContent() {
             </button>
           </div>
 
-          {/* Contributors Section */}
           <div className="bg-white p-4 rounded-lg border border-gray-200">
             <label className="block text-base font-medium text-gray-700 mb-2">
               贡献者: <span className="text-sm text-gray-500">(至少需要1个)</span>
@@ -546,7 +589,6 @@ function ContributeContent() {
             </div>
           </div>
 
-          {/* reCAPTCHA */}
           <div className="bg-white p-4 rounded-lg border border-gray-200">
             <ReCAPTCHA
               sitekey="6LdQz50rAAAAABd5ABB3y4gBuvgKv0woqeIifDYH"
@@ -559,7 +601,6 @@ function ContributeContent() {
             )}
           </div>
 
-          {/* Submit Button */}
           <div className="flex justify-end">
             <button
               type="button"

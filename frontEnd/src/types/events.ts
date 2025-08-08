@@ -1,16 +1,17 @@
-
 /**
- * 通用事件类型
+ * 基础事件类型（确保所有必需属性）
  */
 export interface Event {
   id: string;
+  type: EventType;
   question: string;
+  text: string;
   choices: Record<string, string>;
   results: Record<string, string | ResultProbability[]>;
   endGameChoices?: string[];
   achievements?: Record<string, any>;
   contributors?: string[];
-  type: EventType;
+  // 学校特有属性
   school?: string;
   provinceId?: string;
   cityId?: string;
@@ -28,7 +29,17 @@ export enum EventType {
 }
 
 /**
- * 学校数据结构
+ * 概率结果类型
+ */
+export interface ResultProbability {
+  text: string;
+  prob: number;
+  isEndGame?: boolean;
+  achievement?: string;
+}
+
+/**
+ * 学校数据结构（原始）
  */
 export interface SchoolData {
   id: string;
@@ -37,6 +48,20 @@ export interface SchoolData {
     start?: Event[];
     special?: Event[];
   };
+}
+
+/**
+ * 处理后的学校数据（带统计字段）
+ */
+export interface ProcessedSchoolData {
+  id: string;
+  name: string;
+  events: {
+    start?: Event[];
+    special?: Event[];
+  };
+  start_count: number;
+  special_count: number;
 }
 
 /**
@@ -60,7 +85,7 @@ export interface ProvinceData {
 }
 
 /**
- * API 响应格式
+ * API响应格式
  */
 export interface ApiResponse {
   provinces: {
@@ -74,20 +99,72 @@ export interface ApiResponse {
 }
 
 /**
- * 概率结果类型
+ * 提交数据格式（用于POST请求）
  */
-export interface ResultProbability {
+export interface EventSubmission {
+  type: EventType;
+  question: string;
   text: string;
-  prob: number;
+  choices: Record<string, string>;
+  results: Record<string, string | ResultProbability[]>;
+  randomResults?: Record<string, ResultProbability[]>;
+  contributors: string[];
+  recaptchaToken: string;
+  // 学校特有字段
+  provinceId?: string;
+  cityId?: string;
+  schoolId?: string;
+  schoolZh?: string;
 }
-// 新类型：包含统计字段的学校数据
-export interface ProcessedSchoolData {
-  id: string;
+
+/**
+ * 省份-城市映射信息
+ */
+export interface ProvinceInfo {
   name: string;
-  events: {
-    start?: Event[];
-    special?: Event[];
+  cities: Record<string, string>;
+}
+
+/**
+ * 省份-城市映射表
+ */
+export interface ProvinceCityMap {
+  [provinceId: string]: ProvinceInfo;
+}
+
+/**
+ * 学校名称映射表
+ */
+export interface SchoolMap {
+  [schoolId: string]: string;
+}
+
+/**
+ * 动态路由页面基础Props类型
+ */
+export interface DynamicRoutePageProps {
+  params: {
+    province: string;
+    city: string;
+    school: string;
   };
-  start_count: number;
-  special_count: number;
+  searchParams?: Record<string, string | string[] | undefined>;
+}
+
+/**
+ * 学校页面Props类型（扩展基础类型）
+ */
+export interface SchoolPageProps extends DynamicRoutePageProps {
+  // 可以添加学校页面特有的props
+}
+
+export interface PageParams {
+  province: string;
+  city: string;
+  school: string;
+}
+
+export interface PageProps {
+  params: PageParams;
+  searchParams?: Record<string, string | string[] | undefined>;
 }

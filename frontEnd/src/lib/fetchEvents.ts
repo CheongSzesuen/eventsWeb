@@ -1,10 +1,32 @@
-import { ApiResponse, Event,ProvinceData, CityData, SchoolData, ProcessedSchoolData } from '@/types/events';
-import { EventType } from '@/types/events';
+import { ApiResponse, Event, ProvinceData, CityData, SchoolData, ProcessedSchoolData, ResultProbability, EventType } from '@/types/events';
+import provinceCityMap from '@/public/data/provinceCityMap.json';
+
+// 定义省份城市映射类型
+interface ProvinceInfo {
+  name: string;
+  cities: Record<string, string>;
+}
+
+interface ProvinceCityMap {
+  [key: string]: ProvinceInfo;
+}
+
+// 使用类型断言确保类型安全
+const typedProvinceCityMap = provinceCityMap as unknown as ProvinceCityMap;
+
+// 增强的 Event 类型，确保包含所有必要属性
+interface CompleteEvent extends Event {
+  text: string;
+  question: string;
+  choices: Record<string, string>;
+  results: Record<string, string | ResultProbability[]>;
+}
 
 type FetchConfig = {
   basePath?: string;
   cache?: RequestCache;
   retries?: number;
+  defaultValue?: any;
 };
 
 const BASE_PATH = '/data';
@@ -14,186 +36,133 @@ const DEFAULT_CONFIG: FetchConfig = {
   retries: 1,
 };
 
-// 缓存已知缺失的文件路径
-export const notFoundCache = new Set<string>();
-// 防止并发重复请求
-const inflightRequests = new Map<string, Promise<any>>();
-
-/**
- * 通用数据加载函数
- */
-export async function fetchDataFile<T>(
-  filePath: string,
-  config: FetchConfig = DEFAULT_CONFIG
-): Promise<T | null> {
-  if (notFoundCache.has(filePath)) {
-    console.log(`[CACHE] Skipping known missing file: ${filePath}`);
-    return null;
+// 新增：快速检查文件是否存在的函数
+async function checkFileExists(url: string): Promise<boolean> {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    return response.ok;
+  } catch {
+    return false;
   }
-
-  if (inflightRequests.has(filePath)) {
-    console.log(`[IN-FLIGHT] Reusing in-flight request for: ${filePath}`);
-    return inflightRequests.get(filePath);
-  }
-
-  const maxAttempts = config.retries ?? 1;
-  const effectiveBasePath = config.basePath ?? BASE_PATH;
-
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-  const absoluteUrl = new URL(`${effectiveBasePath}/${filePath}`, appUrl).toString();
-
-  const requestPromise = (async () => {
-    let attempt = 0;
-    while (attempt < maxAttempts) {
-      try {
-        console.log(`[FETCH] Requesting: ${absoluteUrl} (Attempt ${attempt + 1})`);
-        const response = await fetch(absoluteUrl, {
-          cache: config.cache,
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Request-Source': 'fetchEvents'
-          }
-        });
-
-        if (response.status === 404) {
-          notFoundCache.add(filePath);
-          console.warn(`[NOT FOUND] File does not exist: ${absoluteUrl}`);
-          return null;
-        }
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status} - ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        console.log(`[SUCCESS] Successfully loaded: ${absoluteUrl}`);
-        return data as T;
-      } catch (error) {
-        attempt++;
-        console.error(`[ATTEMPT ${attempt}/${maxAttempts}] Failed to load ${absoluteUrl}:`, error);
-        if (attempt >= maxAttempts) {
-          console.error(`[FATAL] All attempts failed for: ${absoluteUrl}`);
-          notFoundCache.add(filePath);
-          return null;
-        }
-        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 200));
-      }
-    }
-    return null;
-  })();
-
-  inflightRequests.set(filePath, requestPromise);
-  return requestPromise.finally(() => {
-    inflightRequests.delete(filePath);
-  });
 }
 
-/**
- * 加载所有事件数据
- */
-export const fetchEvents = async (
-  config?: FetchConfig
-): Promise<ApiResponse> => {
-  const loadWithFallback = async <T>(filePath: string, defaultValue: T) => {
-    const finalConfig = { ...DEFAULT_CONFIG, ...config };
-    const data = await fetchDataFile<T>(filePath, finalConfig);
-    if (data === null) {
-      console.warn(`Loading ${filePath} failed, using default value.`);
-      return defaultValue;
-    }
-    return data;
-  };
+export const fetchEvents = async (config?: FetchConfig): Promise<ApiResponse> => {
+  const finalConfig = { ...DEFAULT_CONFIG, ...config };
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
-  const [provinceData, examData, randomData] = await Promise.all([
-    loadWithFallback<Record<string, { name: string; cities: Record<string, string> }>>(
-      'provinceCityMap.json',
-      {}
+  // 1. 使用类型断言后的省份城市数据
+  const provinceCityData = typedProvinceCityMap;
+
+  // 2. 并行加载其他数据
+  const [examData, randomData] = await Promise.all([
+    fetchDataFile<{ exam_events: Partial<CompleteEvent>[] }>(
+      'events/exam/exam.json',
+      { ...finalConfig, defaultValue: { exam_events: [] } }
     ),
-    loadWithFallback<{ exam_events: Event[] }>('events/exam/exam.json', {
-      exam_events: [],
-    }),
-    loadWithFallback<{ random_events: Event[]; }>('events/random.json', {
-      random_events: [],
-    }),
+    fetchDataFile<{ random_events: Partial<CompleteEvent>[] }>(
+      'events/random.json',
+      { ...finalConfig, defaultValue: { random_events: [] } }
+    )
   ]);
 
+  // 3. 处理省份数据
   const provinces: ProvinceData[] = [];
-  let totalEvents = 0;
+  let provinceEventTotal = 0;
 
-  for (const [provinceId, provinceInfo] of Object.entries(provinceData)) {
-    if (!provinceInfo?.cities) {
-      console.warn(`[SKIP] Invalid province structure: ${provinceId}`);
-      continue;
-    }
+  await Promise.all(
+    Object.entries(provinceCityData).map(async ([provinceId, provinceInfo]) => {
+      const cities: CityData[] = [];
 
-    const cityPromises = Object.entries(provinceInfo.cities).map(
-      async ([cityId, cityName]) => {
-        const cityFilePath = `events/provinces/${provinceId}/${cityId}.json`;
-        const cityData = await loadWithFallback<{ schools: SchoolData[] }>(
-          cityFilePath,
-          { schools: [] }
-        );
+      await Promise.all(
+        Object.entries(provinceInfo.cities).map(async ([cityId, cityName]) => {
+          // 先检查文件是否存在
+          const cityUrl = new URL(
+            `${finalConfig.basePath || BASE_PATH}/events/provinces/${provinceId}/${cityId}.json`,
+            appUrl
+          ).toString();
+          
+          if (!await checkFileExists(cityUrl)) return;
 
-        if (!cityData.schools || cityData.schools.length === 0) {
-          return null;
-        }
+          try {
+            const cityData = await fetchDataFile<{ schools: SchoolData[] }>(
+              `events/provinces/${provinceId}/${cityId}.json`,
+              { ...finalConfig, defaultValue: { schools: [] } }
+            );
 
-        const schools = cityData.schools.map((school): ProcessedSchoolData => ({
-  ...school,
-  events: school.events || { start: [], special: [] },
-  start_count: school.events.start?.length || 0,
-  special_count: school.events.special?.length || 0,
-}));
+            const schools: ProcessedSchoolData[] = (cityData?.schools || []).map((school) => ({
+              ...school,
+              id: school.id || `${provinceId}-${cityId}-${school.name}`,
+              events: school.events || { start: [], special: [] },
+              start_count: school.events?.start?.length || 0,
+              special_count: school.events?.special?.length || 0
+            }));
 
-        const cityTotal = schools.reduce(
-          (acc, s) => acc + s.start_count + s.special_count,
-          0
-        );
+            const cityTotal = schools.reduce(
+              (sum: number, school) => sum + school.start_count + school.special_count,
+              0
+            );
 
-        if (cityTotal > 0) {
-          return {
-            id: cityId,
-            name: cityName,
-            schools,
-            total: cityTotal,
-          };
-        }
+            if (cityTotal > 0) {
+              cities.push({
+                id: cityId,
+                name: cityName,
+                schools,
+                total: cityTotal
+              });
+            }
+          } catch (error) {
+            console.warn(`Failed to process city ${cityId} in province ${provinceId}:`, error);
+          }
+        })
+      );
 
-        return null;
+      if (cities.length > 0) {
+        const provinceTotal = cities.reduce((sum, c) => sum + c.total, 0);
+        provinces.push({
+          id: provinceId,
+          name: provinceInfo.name,
+          cities,
+          total: provinceTotal
+        });
+        provinceEventTotal += provinceTotal;
       }
-    );
+    })
+  );
 
-   const cities = (await Promise.all(cityPromises))
-  .filter((c): c is CityData => c !== null) as CityData[];
-
-    if (cities.length > 0) {
-      const provinceTotal = cities.reduce((acc, c) => acc + c.total, 0);
-      totalEvents += provinceTotal;
-      provinces.push({
-        id: provinceId,
-        name: provinceInfo.name,
-        cities,
-        total: provinceTotal,
-      });
-    }
-  }
-
-  const examEvents = (examData.exam_events || []).map((event) => ({
+  // 4. 处理考试事件
+  const examEvents: CompleteEvent[] = (examData?.exam_events || []).map(event => ({
     ...event,
     type: EventType.Exam,
+    id: event.id || `exam-${event.question?.substring(0, 10)}`,
+    text: event.text || event.question || '',
+    question: event.question || '',
+    choices: event.choices || {},
+    results: event.results || {},
+    endGameChoices: event.endGameChoices || [],
+    achievements: event.achievements || {},
+    contributors: event.contributors || []
   }));
 
-  const randomEvents = (randomData.random_events || []).map((event) => ({
+  // 5. 处理随机事件
+  const randomEvents: CompleteEvent[] = (randomData?.random_events || []).map(event => ({
     ...event,
     type: EventType.Random,
+    id: event.id || `random-${event.question?.substring(0, 10)}`,
+    text: event.text || event.question || '',
+    question: event.question || '',
+    choices: event.choices || {},
+    results: event.results || {},
+    endGameChoices: event.endGameChoices || [],
+    achievements: event.achievements || {},
+    contributors: event.contributors || []
   }));
 
-  const schoolEvents: Event[] = [];
-
-  provinces.forEach((province) => {
-    province.cities.forEach((city) => {
-      city.schools.forEach((school) => {
-        (school.events.start || []).forEach((event) => {
+  // 6. 生成学校事件
+  const schoolEvents: CompleteEvent[] = [];
+  provinces.forEach(province => {
+    province.cities.forEach(city => {
+      city.schools.forEach(school => {
+        (school.events.start || []).forEach(event => {
           schoolEvents.push({
             ...event,
             type: EventType.SchoolStart,
@@ -201,9 +170,17 @@ export const fetchEvents = async (
             provinceId: province.id,
             cityId: city.id,
             schoolId: school.id,
+            id: event.id || `${province.id}-${city.id}-${school.id}-start-${event.question?.substring(0, 5)}`,
+            text: event.text || event.question || '',
+            question: event.question || '',
+            choices: event.choices || {},
+            results: event.results || {},
+            endGameChoices: event.endGameChoices || [],
+            achievements: event.achievements || {},
+            contributors: event.contributors || []
           });
         });
-        (school.events.special || []).forEach((event) => {
+        (school.events.special || []).forEach(event => {
           schoolEvents.push({
             ...event,
             type: EventType.SchoolSpecial,
@@ -211,179 +188,222 @@ export const fetchEvents = async (
             provinceId: province.id,
             cityId: city.id,
             schoolId: school.id,
+            id: event.id || `${province.id}-${city.id}-${school.id}-special-${event.question?.substring(0, 5)}`,
+            text: event.text || event.question || '',
+            question: event.question || '',
+            choices: event.choices || {},
+            results: event.results || {},
+            endGameChoices: event.endGameChoices || [],
+            achievements: event.achievements || {},
+            contributors: event.contributors || []
           });
         });
       });
     });
   });
 
+  // 7. 计算总数
+  const totalEvents = provinceEventTotal + examEvents.length + randomEvents.length + schoolEvents.length;
+
   return {
     provinces: {
-      total: totalEvents,
-      provinces,
+      total: provinceEventTotal,
+      provinces
     },
     exam_events: examEvents,
     random_events: randomEvents,
     school_events: schoolEvents,
-    total: totalEvents + examEvents.length + randomEvents.length,
+    total: totalEvents
   };
 };
 
-/**
- * 获取省份数据
- */
-export const getProvinceData = async (provinceId: string): Promise<ProvinceData | null> => {
-  const provinceCityMap = await fetchDataFile<Record<string, { name: string; cities: Record<string, string> }>>('provinceCityMap.json');
+// 辅助函数：通用数据加载
+async function fetchDataFile<T>(filePath: string, config: FetchConfig = DEFAULT_CONFIG): Promise<T | null> {
+  const effectiveBasePath = config.basePath ?? BASE_PATH;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const absoluteUrl = new URL(`${effectiveBasePath}/${filePath}`, appUrl).toString();
 
-  const provinceInfo = provinceCityMap?.[provinceId];
+  try {
+    const response = await fetch(absoluteUrl, {
+      cache: config.cache,
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
 
-  if (!provinceInfo) {
-    console.error(`Failed to load province map or invalid province ID: ${provinceId}`);
+    if (!response.ok) {
+      if (response.status === 404) {
+        return config.defaultValue ?? null;
+      }
+      throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error(`Failed to load ${absoluteUrl}:`, error);
+    return config.defaultValue ?? null;
+  }
+}
+
+// 辅助函数：获取省份数据
+export const getProvinceData = async (
+  provinceId: string, 
+  config?: FetchConfig
+): Promise<ProvinceData | null> => {
+  const finalConfig = { ...DEFAULT_CONFIG, ...config };
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  
+  try {
+    // 使用类型断言后的数据
+    const provinceInfo = typedProvinceCityMap[provinceId];
+    if (!provinceInfo) return null;
+
+    const cityPromises = Object.entries(provinceInfo.cities || {}).map(
+      async ([cityId, cityName]) => {
+        const cityUrl = new URL(
+          `${finalConfig.basePath || BASE_PATH}/events/provinces/${provinceId}/${cityId}.json`,
+          appUrl
+        ).toString();
+        
+        if (!await checkFileExists(cityUrl)) return null;
+
+        try {
+          const cityData = await fetchDataFile<{ schools: SchoolData[] }>(
+            `events/provinces/${provinceId}/${cityId}.json`,
+            { ...finalConfig, defaultValue: { schools: [] } }
+          );
+
+          const schools: ProcessedSchoolData[] = (cityData?.schools || []).map((school) => ({
+            ...school,
+            events: school.events || { start: [], special: [] },
+            start_count: school.events?.start?.length || 0,
+            special_count: school.events?.special?.length || 0
+          }));
+
+          const cityTotal = schools.reduce(
+            (sum: number, school) => sum + school.start_count + school.special_count,
+            0
+          );
+
+          return cityTotal > 0
+            ? { 
+                id: cityId, 
+                name: cityName, 
+                schools, 
+                total: cityTotal 
+              } as CityData
+            : null;
+        } catch (error) {
+          console.warn(`Failed to process city ${cityId} in province ${provinceId}:`, error);
+          return null;
+        }
+      }
+    );
+
+    const cities = (await Promise.all(cityPromises))
+      .filter((city): city is CityData => city !== null);
+
+    return {
+      id: provinceId,
+      name: provinceInfo.name,
+      cities,
+      total: cities.reduce((sum, city) => sum + city.total, 0)
+    };
+  } catch (error) {
+    console.error(`Failed to load province data for ${provinceId}:`, error);
     return null;
   }
-
-  const cityPromises = Object.entries(provinceInfo.cities || {}).map(
-    async ([cityId, cityName]) => {
-      const cityFilePath = `events/provinces/${provinceId}/${cityId}.json`;
-      const cityData = await fetchDataFile<{ schools: SchoolData[] }>(cityFilePath);
-
-      if (!cityData) return null;
-
-      const schools = cityData.schools.map((school): ProcessedSchoolData => ({
-        ...school,
-        events: school.events || { start: [], special: [] },
-        start_count: school.events.start?.length || 0,
-        special_count: school.events.special?.length || 0,
-      }));
-
-      const cityTotal = schools.reduce(
-        (acc, s) => acc + s.start_count + s.special_count,
-        0
-      );
-
-      return cityTotal > 0
-        ? { id: cityId, name: cityName, schools, total: cityTotal }
-        : null;
-    }
-  );
-
-  const cities = (await Promise.all(cityPromises)).filter(
-    (c): c is CityData => c !== null
-  ) as CityData[];
-
-  // ✅ 即使没有城市数据，也返回非空结构
-  return {
-    id: provinceId,
-    name: provinceInfo.name,
-    cities,
-    total: cities.reduce((acc, c) => acc + c.total, 0),
-  };
 };
 
-/**
- * 获取城市数据
- */
+// 辅助函数：获取城市数据
 export const getCityData = async (
   provinceId: string,
-  cityId: string
+  cityId: string,
+  config?: FetchConfig
 ): Promise<CityData | null> => {
-  const provinceCityMap = await fetchDataFile<
-    Record<string, { name: string; cities: Record<string, string> }>
-  >('provinceCityMap.json');
+  const finalConfig = { ...DEFAULT_CONFIG, ...config };
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
-  const cityName = provinceCityMap?.[provinceId]?.cities?.[cityId];
+  try {
+    // 使用类型断言后的数据
+    const cityName = typedProvinceCityMap[provinceId]?.cities?.[cityId];
+    if (!cityName) return null;
 
-  if (!cityName) {
-    console.error(`Invalid province/city ID: ${provinceId}/${cityId}`);
-    return null;
-  }
+    const cityUrl = new URL(
+      `${finalConfig.basePath || BASE_PATH}/events/provinces/${provinceId}/${cityId}.json`,
+      appUrl
+    ).toString();
+    
+    if (!await checkFileExists(cityUrl)) return null;
 
-  const cityFilePath = `events/provinces/${provinceId}/${cityId}.json`;
-  const cityData = await fetchDataFile<{ schools: SchoolData[] }>(cityFilePath);
+    const cityData = await fetchDataFile<{ schools: SchoolData[] }>(
+      `events/provinces/${provinceId}/${cityId}.json`,
+      { ...finalConfig, defaultValue: { schools: [] } }
+    );
 
-  if (!cityData) {
-    // ✅ 返回空城市结构，而不是 null
+    const schools: ProcessedSchoolData[] = (cityData?.schools || []).map((school) => ({
+      ...school,
+      events: school.events || { start: [], special: [] },
+      start_count: school.events?.start?.length || 0,
+      special_count: school.events?.special?.length || 0
+    }));
+
+    const cityTotal = schools.reduce(
+      (sum: number, school) => sum + school.start_count + school.special_count,
+      0
+    );
+
     return {
       id: cityId,
       name: cityName,
-      schools: [],
-      total: 0,
+      schools,
+      total: cityTotal
     };
+  } catch (error) {
+    console.error(`Failed to load city data for ${provinceId}/${cityId}:`, error);
+    return null;
   }
-
-  const schools = cityData.schools.map((school): ProcessedSchoolData => ({
-    ...school,
-    events: school.events || { start: [], special: [] },
-    start_count: school.events.start?.length || 0,
-    special_count: school.events.special?.length || 0,
-  }));
-
-  const cityTotal = schools.reduce(
-    (acc, s) => acc + s.start_count + s.special_count,
-    0
-  );
-
-  return {
-    id: cityId,
-    name: cityName,
-    schools,
-    total: cityTotal,
-  };
 };
 
-/**
- * 获取城市下的所有学校
- */
+// 辅助函数：获取城市下的学校
 export const getSchoolsByCity = async (
   provinceName: string,
-  cityName: string
+  cityName: string,
+  config?: FetchConfig
 ): Promise<SchoolData[]> => {
+  const finalConfig = { ...DEFAULT_CONFIG, ...config };
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
   try {
-    // 1. 加载省份城市映射
-    const provinceCityMap = await fetchDataFile<Record<string, {
-      name: string;
-      cities: Record<string, string>;
-    }>>('provinceCityMap.json');
-
-    if (!provinceCityMap) {
-      console.warn('省份城市映射数据加载失败，返回空数组');
-      return [];
-    }
-
-    // 2. 查找匹配省份
-    const provinceEntry = Object.entries(provinceCityMap).find(
+    // 使用类型断言后的数据
+    const provinceEntry = Object.entries(typedProvinceCityMap).find(
       ([, info]) => info.name === provinceName
     );
+    if (!provinceEntry) return [];
 
-    if (!provinceEntry) {
-      console.warn(`找不到省份【${provinceName}】，返回空数组`);
-      return [];
-    }
-
-    const [provinceId, provinceInfo] = provinceEntry;
-
-    // 3. 查找匹配城市
-    const cityEntry = Object.entries(provinceInfo.cities).find(
+    const [provinceId] = provinceEntry;
+    const cityEntry = Object.entries(provinceEntry[1].cities).find(
       ([, name]) => name === cityName
     );
-
-    if (!cityEntry) {
-      console.warn(`在省份【${provinceName}】中找不到城市【${cityName}】，返回空数组`);
-      return [];
-    }
+    if (!cityEntry) return [];
 
     const [cityId] = cityEntry;
+    
+    const cityUrl = new URL(
+      `${finalConfig.basePath || BASE_PATH}/events/provinces/${provinceId}/${cityId}.json`,
+      appUrl
+    ).toString();
+    
+    if (!await checkFileExists(cityUrl)) return [];
 
-    // 4. 构建文件路径
-    const cityFilePath = `events/provinces/${provinceId}/${cityId}.json`;
-    
-    // 5. 加载城市数据（静默失败）
-    const cityData = await fetchDataFile<{ schools: SchoolData[] }>(cityFilePath);
-    
-    // 6. 返回数据或空数组
+    const cityData = await fetchDataFile<{ schools: SchoolData[] }>(
+      `events/provinces/${provinceId}/${cityId}.json`,
+      { ...finalConfig, defaultValue: { schools: [] } }
+    );
+
     return cityData?.schools || [];
   } catch (error) {
-    console.warn('获取学校数据时出错，返回空数组:', error);
+    console.error(`Failed to get schools for ${provinceName}/${cityName}:`, error);
     return [];
   }
 };

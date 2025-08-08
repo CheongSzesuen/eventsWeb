@@ -1,21 +1,34 @@
 import { getProvinceData } from '@/lib/fetchEvents';
 import EventCard from '@/components/EventCard';
 import { EventType } from '@/types/events';
-import { SchoolData, CityData, ProvinceData } from '@/types/events';
-
+import type { SchoolData, CityData, ProvinceData } from '@/types/events';
 export const runtime = 'edge';
+export const dynamic = 'auto';
+export const revalidate = 3600;
+// export const dynamic = 'force-static';
 
-export default async function ProvincePage({ params }: { params: Promise<{ province: string }> }) {
+// 定义参数类型
+interface PageParams {
+  province: string;
+}
+
+export default async function ProvincePage({ 
+  params 
+}: { 
+  params: Promise<PageParams> 
+}) {
+  // 解构 Promise 参数
   const { province } = await params;
+  
   const provinceData = await getProvinceData(province);
 
   if (!provinceData) {
-  return <div className="text-xl font-bold text-red-500">省份数据加载失败或不存在</div>;
-}
+    return <div className="text-xl font-bold text-red-500">省份数据加载失败或不存在</div>;
+  }
 
-if (provinceData.cities.length === 0) {
-  return <div className="text-xl font-bold text-gray-500">该省份暂无事件数据</div>;
-}
+  if (provinceData.cities.length === 0) {
+    return <div className="text-xl font-bold text-gray-500">该省份暂无事件数据</div>;
+  }
 
   return (
     <>
@@ -38,20 +51,13 @@ if (provinceData.cities.length === 0) {
                 const startEvents = schoolEvents.start || [];
                 const specialEvents = schoolEvents.special || [];
 
-                const hasStartEvents = startEvents.length > 0;
-                const hasSpecialEvents = specialEvents.length > 0;
-
                 return (
                   <div key={school.id} className="mb-8">
                     <h3 className="text-2xl font-semibold mb-2">{school.name}</h3>
 
                     <div className="ml-4">
-                      {!hasStartEvents && !hasSpecialEvents && (
-                        <div className="text-gray-500 mb-4">暂无事件</div>
-                      )}
-
                       {/* 开学事件 */}
-                      {hasStartEvents && (
+                      {startEvents.length > 0 && (
                         <>
                           <h4 className="text-xl font-semibold mb-2">开学事件</h4>
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -77,7 +83,7 @@ if (provinceData.cities.length === 0) {
                       )}
 
                       {/* 特殊事件 */}
-                      {hasSpecialEvents && (
+                      {specialEvents.length > 0 && (
                         <>
                           <h4 className="text-xl font-semibold mb-2 mt-6">特殊事件</h4>
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -100,6 +106,11 @@ if (provinceData.cities.length === 0) {
                             ))}
                           </div>
                         </>
+                      )}
+
+                      {/* 无事件提示 */}
+                      {startEvents.length === 0 && specialEvents.length === 0 && (
+                        <div className="text-gray-500 mb-4">暂无事件</div>
                       )}
                     </div>
                   </div>
